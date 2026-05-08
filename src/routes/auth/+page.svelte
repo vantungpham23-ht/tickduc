@@ -44,6 +44,8 @@
 		try {
 			if (isSignUp) {
 				// Sign up new user
+				console.log('🔄 Đang đăng ký với:', { email, passwordLength: password.length });
+				
 				const { data, error } = await supabase.auth.signUp({
 					email,
 					password,
@@ -53,6 +55,8 @@
 						}
 					}
 				});
+
+				console.log('📦 Supabase response:', { data, error });
 
 				if (error) throw error;
 
@@ -65,10 +69,14 @@
 				}
 			} else {
 				// Sign in existing user
+				console.log('🔄 Đang đăng nhập với:', { email });
+				
 				const { data, error } = await supabase.auth.signInWithPassword({
 					email,
 					password
 				});
+
+				console.log('📦 Supabase response:', { data, error });
 
 				if (error) throw error;
 
@@ -77,7 +85,21 @@
 				setTimeout(() => goto('/dashboard'), 1500);
 			}
 		} catch (error: any) {
-			errorMessage = error.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
+			console.error('❌ Lỗi đăng nhập/đăng ký:', error);
+			console.error('   error.message:', error.message);
+			console.error('   error.status:', error.status);
+			console.error('   error.code:', error.code);
+			
+			// Hiển thị lỗi chi tiết hơn
+			if (error.message?.includes('Invalid login credentials')) {
+				errorMessage = 'Sai email hoặc mật khẩu';
+			} else if (error.message?.includes('User already registered')) {
+				errorMessage = 'Email này đã được đăng ký. Hãy đăng nhập hoặc dùng email khác.';
+			} else if (error.message?.includes('Email not confirmed')) {
+				errorMessage = 'Email chưa được xác thực. Vui lòng kiểm tra hộp thư.';
+			} else {
+				errorMessage = error.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
+			}
 		}
 
 		isLoading = false;
@@ -103,7 +125,10 @@
 		<div class="fixed top-6 left-1/2 -translate-x-1/2 right-6 z-50 animate-fadeInUp">
 			<div class="bg-zen-brown text-zen-beige rounded-2xl px-5 py-4 shadow-xl max-w-md mx-auto">
 				<div class="flex items-start gap-3">
-					<span class="text-2xl">⚠️</span>
+					<svg class="w-6 h-6 text-zen-gold flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"/>
+						<path d="M12 8v4M12 16h.01"/>
+					</svg>
 					<div>
 						<p class="font-medium text-sm">Lưu ý: Bạn đang dùng tài khoản Khách. Công đức sẽ chỉ lưu trên thiết bị này và không được xếp hạng.</p>
 					</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Camera, CameraOff, AlertCircle } from 'lucide-svelte';
+	import { ArrowLeft, Settings, Camera, CameraOff, AlertCircle } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 	import { supabase } from '$lib/supabase';
@@ -23,6 +23,13 @@
 	let bodyHeight = $state(0.5);
 	let smoothedCenterX = 0.5;
 	let smoothedCenterY = 0.5;
+	
+	// Tracking state - để tránh mất tracking
+	let trackingConfidence = $state(0); // 0-100
+	let lastSeenHands = 0; // timestamp khi thấy hands lần cuối
+	let isTrackingLost = $state(false);
+	const TRACKING_TIMEOUT = 500; // ms trước khi báo mất tracking
+	const RECOVERY_FADE_DURATION = 300; // ms để fade aura khi mất
 
 	// Meditation state
 	let isPraying = $state(false);
@@ -46,8 +53,12 @@
 	let bellAudio: HTMLAudioElement;
 
 	// Constants
-	const PRAYING_THRESHOLD = 0.15;
+	const PRAYING_THRESHOLD = 0.22;
 	const PRAYING_TIME = 10;
+
+	// Prayer quality feedback
+	let prayerQuality = $state(0);
+	let prayerHint = $state<'palms' | 'fingers' | 'together' | 'perfect'>('palms');
 
 	async function initializeHandLandmarker() {
 		try {
@@ -145,7 +156,29 @@
 	}
 
 	function updateBodyTracking(results: any) {
-		if (!results.landmarks || results.landmarks.length === 0) return;
+		if (!results.landmarks || results.landmarks.length === 0) {
+			// Không có hands - giảm confidence theo thời gian
+			const timeSinceLastSeen = Date.now() - lastSeenHands;
+			
+			if (lastSeenHands > 0) {
+				// Đang trong quá trình mất tracking
+				if (timeSinceLastSeen > TRACKING_TIMEOUT) {
+					trackingConfidence = 0;
+					isTrackingLost = true;
+					// Fade aura ra nhưng KHÔNG reset vị trí ngay
+					// bodyCenterX, bodyCenterY vẫn giữ nguyên để không bị nhảy
+				} else {
+					// Đang fade dần
+					trackingConfidence = Math.max(0, 100 - (timeSinceLastSeen / TRACKING_TIMEOUT) * 100);
+				}
+			}
+			return;
+		}
+
+		// Có hands - cập nhật tracking
+		lastSeenHands = Date.now();
+		isTrackingLost = false;
+		trackingConfidence = Math.min(100, trackingConfidence + 20); // Tăng nhanh khi thấy
 
 		let minX = 1, maxX = 0, minY = 1, maxY = 0;
 		let totalX = 0, totalY = 0;
@@ -174,9 +207,9 @@
 		// Adjust Y position (hands are usually above center, so move up)
 		const adjustedY = Math.max(0.2, Math.min(0.8, centerY - height * 0.1));
 
-		// Smooth the movement
-		smoothedCenterX = smoothedCenterX * 0.7 + centerX * 0.3;
-		smoothedCenterY = smoothedCenterY * 0.7 + adjustedY * 0.3;
+		// Smooth the movement - tăng smoothing để không bị jitter
+		smoothedCenterX = smoothedCenterX * 0.85 + centerX * 0.15;
+		smoothedCenterY = smoothedCenterY * 0.85 + adjustedY * 0.15;
 
 		bodyCenterX = smoothedCenterX;
 		bodyCenterY = smoothedCenterY;
@@ -191,7 +224,9 @@
 		ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
 		if (results.landmarks && results.landmarks.length > 0) {
-			const color = isPraying ? '#C5A059' : 'rgba(255, 255, 255, 0.6)';
+			// Tracking tốt - màu vàng gold
+			const color = isPraying ? '#C5A059' : 'rgba(0, 255, 255, 0.8)';
+			const dotSize = 5;
 			
 			for (const landmarks of results.landmarks) {
 				const connections = [
@@ -218,10 +253,35 @@
 				ctx.fillStyle = color;
 				for (const point of landmarks) {
 					ctx.beginPath();
-					ctx.arc(point.x * canvasElement.width, point.y * canvasElement.height, 5, 0, 2 * Math.PI);
+					ctx.arc(point.x * canvasElement.width, point.y * canvasElement.height, dotSize, 0, 2 * Math.PI);
 					ctx.fill();
 				}
 			}
+		} else if (isTrackingLost) {
+			// Không có hands - vẽ icon tìm kiếm nhẹ ở giữa
+			const centerX = canvasElement.width / 2;
+			const centerY = canvasElement.height / 2;
+			
+			ctx.save();
+			ctx.strokeStyle = 'rgba(255, 200, 100, 0.4)';
+			ctx.lineWidth = 2;
+			ctx.setLineDash([5, 5]);
+			
+			// Vẽ vòng tròn tìm kiếm
+			ctx.beginPath();
+			ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
+			ctx.stroke();
+			
+			// Vẽ mũi tên
+			ctx.setLineDash([]);
+			ctx.beginPath();
+			ctx.moveTo(centerX + 20, centerY + 20);
+			ctx.lineTo(centerX, centerY);
+			ctx.lineTo(centerX + 15, centerY);
+			ctx.moveTo(centerX, centerY);
+			ctx.lineTo(centerX, centerY + 15);
+			ctx.stroke();
+			ctx.restore();
 		}
 	}
 
@@ -231,7 +291,8 @@
 
 		ctx.clearRect(0, 0, auraCanvas.width, auraCanvas.height);
 
-		if (!isPraying && !showAuraFlash) return;
+		// Không vẽ aura nếu tracking bị mất hoàn toàn
+		if (trackingConfidence === 0 && !showAuraFlash) return;
 
 		const centerX = bodyCenterX * auraCanvas.width;
 		const centerY = bodyCenterY * auraCanvas.height;
@@ -241,16 +302,18 @@
 		if (showAuraFlash) {
 			// Draw burst particles when merit triggers
 			drawAuraBurst(ctx, centerX, centerY, width, height);
-		} else {
-			// Draw tracking body outline aura
-			drawBodyOutlineAura(ctx, centerX, centerY, width, height);
+		} else if (trackingConfidence > 10) {
+			// Tính opacity dựa trên tracking confidence
+			const fadeAlpha = Math.min(1, trackingConfidence / 70);
+			// Draw tracking body outline aura với fade effect
+			drawBodyOutlineAura(ctx, centerX, centerY, width, height, fadeAlpha);
 		}
 
 		// Draw floating particles
 		drawParticles(ctx);
 	}
 
-	function drawBodyOutlineAura(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, width: number, height: number) {
+	function drawBodyOutlineAura(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, width: number, height: number, fadeAlpha: number = 1) {
 		// Create neon glow layers with cyan/blue gradient
 		const layers = [
 			{ scale: 1.6, alpha: 0.08, blur: 60 },
@@ -281,8 +344,8 @@
 				centerX, centerY, Math.max(width, height) * layer.scale * 1.5
 			);
 			gradient.addColorStop(0, `rgba(0, 255, 255, 0)`);
-			gradient.addColorStop(0.3, `rgba(0, 200, 255, ${layer.alpha})`);
-			gradient.addColorStop(0.6, `rgba(100, 150, 255, ${layer.alpha * 0.7})`);
+			gradient.addColorStop(0.3, `rgba(0, 200, 255, ${layer.alpha * fadeAlpha})`);
+			gradient.addColorStop(0.6, `rgba(100, 150, 255, ${layer.alpha * 0.7 * fadeAlpha})`);
 			gradient.addColorStop(1, `rgba(150, 100, 255, 0)`);
 			
 			ctx.fillStyle = gradient;
@@ -302,7 +365,7 @@
 			0,
 			Math.PI * 2
 		);
-		ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)';
+		ctx.strokeStyle = `rgba(0, 255, 255, ${0.6 * fadeAlpha})`;
 		ctx.lineWidth = 2;
 		ctx.shadowColor = '#00FFFF';
 		ctx.shadowBlur = 20;
@@ -321,15 +384,15 @@
 			0,
 			Math.PI * 2
 		);
-		ctx.strokeStyle = 'rgba(180, 100, 255, 0.4)';
+		ctx.strokeStyle = `rgba(180, 100, 255, ${0.4 * fadeAlpha})`;
 		ctx.lineWidth = 1.5;
 		ctx.shadowColor = '#B464FF';
 		ctx.shadowBlur = 15;
 		ctx.stroke();
 		ctx.restore();
 
-		// Add floating neon particles
-		if (Math.random() > 0.6) {
+		// Add floating neon particles - giảm khi tracking yếu
+		if (Math.random() > 0.6 && fadeAlpha > 0.3) {
 			const angle = Math.random() * Math.PI * 2;
 			const radius = width * (0.7 + Math.random() * 0.5);
 			auraParticles.push({
@@ -337,8 +400,8 @@
 				y: centerY + Math.sin(angle) * radius * 0.7,
 				vx: (Math.random() - 0.5) * 0.8,
 				vy: -Math.random() * 1.5 - 0.8,
-				life: 50,
-				maxLife: 50,
+				life: Math.floor(50 * fadeAlpha),
+				maxLife: Math.floor(50 * fadeAlpha),
 				size: Math.random() * 3 + 2
 			});
 		}
@@ -447,21 +510,60 @@
 			if (isPraying) {
 				resetPrayerTimer();
 			}
+			// Reset prayer quality when hands not detected
+			prayerQuality = 0;
+			prayerHint = 'palms';
 			return;
 		}
 
 		const hand1 = results.landmarks[0];
 		const hand2 = results.landmarks[1];
 
+		// Calculate distances for multiple finger pairs for better detection
 		const wrist1 = hand1[0];
 		const wrist2 = hand2[0];
+		const thumb1 = hand1[4];
+		const thumb2 = hand2[4];
 		const index1 = hand1[8];
 		const index2 = hand2[8];
+		const middle1 = hand1[12];
+		const middle2 = hand2[12];
 
+		// Distance between palms (wrists)
 		const wristDistance = calculateDistance(wrist1, wrist2);
+		
+		// Distance between thumbs
+		const thumbDistance = calculateDistance(thumb1, thumb2);
+		
+		// Distance between index fingers
 		const indexDistance = calculateDistance(index1, index2);
+		
+		// Distance between middle fingers
+		const middleDistance = calculateDistance(middle1, middle2);
 
-		const currentlyPraying = wristDistance < PRAYING_THRESHOLD && indexDistance < PRAYING_THRESHOLD;
+		// Average distance of all finger pairs
+		const avgFingerDistance = (thumbDistance + indexDistance + middleDistance) / 3;
+		
+		// Calculate prayer quality (0-100)
+		// Best case: both wrists close AND all fingers close
+		const wristQuality = Math.max(0, 1 - wristDistance / 0.3) * 50;
+		const fingerQuality = Math.max(0, 1 - avgFingerDistance / 0.25) * 50;
+		prayerQuality = Math.round(wristQuality + fingerQuality);
+
+		// Determine hint based on what's wrong
+		if (wristDistance > 0.2) {
+			prayerHint = 'palms';
+		} else if (avgFingerDistance > 0.15) {
+			prayerHint = 'fingers';
+		} else if (avgFingerDistance > PRAYING_THRESHOLD) {
+			prayerHint = 'together';
+		} else {
+			prayerHint = 'perfect';
+		}
+
+		// Use average of wrist and finger distance for more forgiving detection
+		const combinedDistance = (wristDistance + avgFingerDistance) / 2;
+		const currentlyPraying = combinedDistance < PRAYING_THRESHOLD && wristDistance < 0.25;
 
 		if (currentlyPraying && !isPraying) {
 			isPraying = true;
@@ -536,6 +638,8 @@
 		isPraying = false;
 		prayerStartTime = null;
 		prayerProgress = 0;
+		prayerQuality = 0;
+		prayerHint = 'palms';
 	}
 
 	function saveMerit() {
@@ -610,19 +714,39 @@
 	let circleProgress = $derived({
 		strokeDashoffset: 565.48 - (prayerProgress / PRAYING_TIME) * 565.48
 	});
+
+	// Status text based on state
+	let statusText = $derived(() => {
+		if (!cameraActive || cameraError) return '';
+		if (isPraying) return 'Đang đếm ngược...';
+		if (isTrackingLost) return 'Không tìm thấy tay';
+		if (trackingConfidence < 30) return 'Đang tìm kiếm...';
+		if (prayerQuality >= 80) return 'Đúng tư thế rồi!';
+		if (prayerQuality >= 50) return 'Tốt rồi, giữ thêm...';
+		return 'Hãy chấp tay và giữ yên';
+	});
 </script>
 
-<div class="min-h-screen bg-zen-brown relative overflow-hidden">
+<div class="min-h-screen bg-black relative overflow-hidden">
 	<!-- Camera Feed -->
 	<div class="absolute inset-0">
 		<video
 			bind:this={videoElement}
 			class="w-full h-full object-cover"
-			style="filter: brightness(0.85); transform: scaleX(-1);"
+			style="transform: scaleX(-1);"
 			playsinline
 			muted
 		></video>
 	</div>
+
+	<!-- Hand Landmarks Canvas -->
+	<canvas
+		bind:this={canvasElement}
+		class="absolute inset-0 w-full h-full pointer-events-none"
+		width={1280}
+		height={720}
+		style="transform: scaleX(-1);"
+	></canvas>
 
 	<!-- Aura Canvas (body tracking glow) -->
 	<canvas
@@ -633,148 +757,139 @@
 		style="transform: scaleX(-1);"
 	></canvas>
 
-	<!-- Hand Landmarks Canvas -->
-	<canvas
-		bind:this={canvasElement}
-		class="absolute inset-0 w-full h-full"
-		width={1280}
-		height={720}
-		style="transform: scaleX(-1);"
-	></canvas>
-
-	<!-- Cinematic Overlay -->
-	<div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none"></div>
+	<!-- Dark Overlay -->
+	<div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
 
 	<!-- Header -->
-	<header class="relative z-30 px-4 py-4 flex items-center justify-between">
+	<header class="relative z-30 px-4 pt-6 pb-4 flex items-center justify-between">
 		<button 
 			onclick={() => goto('/dashboard')}
-			class="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white/80 hover:bg-black/50 transition-colors"
+			class="p-2 rounded-full bg-white/10 backdrop-blur-md"
 		>
-			<ArrowLeft class="w-6 h-6" />
+			<ArrowLeft class="w-5 h-5 text-white" />
 		</button>
 		
-		<div class="flex items-center gap-4">
-			{#if totalMerits > 0}
-				<div class="px-3 py-1 rounded-full bg-zen-gold/20 border border-zen-gold/30">
-					<span class="text-zen-gold font-medium text-sm">{totalMerits} công đức</span>
-				</div>
-			{/if}
-		</div>
-
-		<div class="w-10"></div>
+		<h1 class="font-serif text-lg font-semibold text-white tracking-wide">Tích công đức</h1>
+		
+		<button class="p-2 rounded-full bg-white/10 backdrop-blur-md">
+			<Settings class="w-5 h-5 text-white" />
+		</button>
 	</header>
 
-	<!-- Main Content -->
-	<main class="relative z-20 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
-		
-		<!-- Loading State -->
-		{#if isLoading && !cameraError}
-			<div class="text-center">
-				<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-white/10 flex items-center justify-center">
-					<Camera class="w-10 h-10 text-white/60 animate-pulse" />
+	<!-- Countdown Circle - Top Left -->
+	{#if cameraActive && !cameraError}
+		<div class="absolute top-24 left-6 z-30">
+			<div class="relative w-20 h-20">
+				<!-- Background circle -->
+				<svg class="w-full h-full -rotate-90" viewBox="0 0 80 80">
+					<circle
+						cx="40"
+						cy="40"
+						r="35"
+						fill="none"
+						stroke="rgba(255,255,255,0.15)"
+						stroke-width="3"
+					/>
+					<circle
+						cx="40"
+						cy="40"
+						r="35"
+						fill="none"
+						stroke={isPraying ? '#FFD700' : 'rgba(255,255,255,0.5)'}
+						stroke-width="3"
+						stroke-linecap="round"
+						stroke-dasharray="219.91"
+						stroke-dashoffset={219.91 - (prayerProgress / PRAYING_TIME) * 219.91}
+						class="transition-all duration-100"
+					/>
+				</svg>
+				
+				<div class="absolute inset-0 flex flex-col items-center justify-center">
+					<span class="text-2xl font-bold text-white">
+						{Math.ceil(PRAYING_TIME - prayerProgress)}
+					</span>
+					{#if !isPraying}
+						<span class="text-[10px] text-white/50 -mt-1">giây</span>
+					{/if}
 				</div>
-				<p class="text-white/60">Đang khởi động camera...</p>
 			</div>
-		{/if}
+		</div>
+	{/if}
 
-		<!-- Error State -->
-		{#if cameraError}
-			<div class="text-center px-6">
-				<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
-					<CameraOff class="w-10 h-10 text-red-400" />
+	<!-- Loading State -->
+	{#if isLoading && !cameraError}
+		<div class="absolute inset-0 flex items-center justify-center z-20 bg-black/60">
+			<div class="text-center">
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
+					<Camera class="w-8 h-8 text-white/60 animate-pulse" />
 				</div>
-				<p class="text-red-300 mb-2 flex items-center justify-center gap-2">
-					<AlertCircle class="w-5 h-5" />
+				<p class="text-white/60 text-sm">Đang khởi động...</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Error State -->
+	{#if cameraError}
+		<div class="absolute inset-0 flex items-center justify-center z-20 bg-black/80 px-6">
+			<div class="text-center">
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+					<CameraOff class="w-8 h-8 text-red-400" />
+				</div>
+				<p class="text-red-300 mb-2 flex items-center justify-center gap-2 text-sm">
+					<AlertCircle class="w-4 h-4" />
 					{cameraError}
 				</p>
 				<div class="flex gap-3 justify-center mt-6">
 					<button
-						onclick={handleRetryCamera}
-						class="px-6 py-3 bg-zen-gold text-zen-brown rounded-full font-medium hover:bg-zen-gold/90 transition-colors"
+						onclick={() => { cameraError = null; startCamera(); }}
+						class="px-5 py-2.5 bg-yellow-500 text-black rounded-full text-sm font-medium"
 					>
 						Thử lại
 					</button>
 					<button
-						onclick={handleGuestMode}
-						class="px-6 py-3 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors"
+						onclick={() => goto('/setup-profile')}
+						class="px-5 py-2.5 bg-white/10 text-white rounded-full text-sm font-medium"
 					>
 						Dùng thử
 					</button>
 				</div>
 			</div>
-		{/if}
+		</div>
+	{/if}
 
-		<!-- Praying Timer -->
-		{#if cameraActive && !cameraError}
-			<div class="text-center">
-				<!-- Thin Circular Progress -->
-				<div class="relative w-48 h-48 mx-auto">
-					<svg class="w-full h-full -rotate-90" viewBox="0 0 200 200">
-						<circle
-							cx="100"
-							cy="100"
-							r="90"
-							fill="none"
-							stroke="rgba(255,255,255,0.1)"
-							stroke-width="4"
-						/>
-						<circle
-							cx="100"
-							cy="100"
-							r="90"
-							fill="none"
-							stroke={isPraying ? '#C5A059' : 'rgba(255,255,255,0.4)'}
-							stroke-width="4"
-							stroke-linecap="round"
-							stroke-dasharray="565.48"
-							stroke-dashoffset={circleProgress.strokeDashoffset}
-							class="transition-all duration-100"
-						/>
+	<!-- Bottom Footer -->
+	{#if cameraActive && !cameraError}
+		<div class="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-8 px-6">
+			<div class="flex flex-col items-center gap-3">
+				<!-- Meditation Icon -->
+				<div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+					<svg class="w-7 h-7 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<ellipse cx="24" cy="42" rx="5" ry="2.5"/>
+						<path d="M24 38 C24 38 19 32 19 26 C19 20 24 14 24 14 C24 14 29 20 29 26 C29 32 24 38 24 38"/>
+						<path d="M19 34 C15 28 12 24 12 20 C12 16 17 14 21 16"/>
+						<path d="M29 34 C33 28 36 24 36 20 C36 16 31 14 27 16"/>
 					</svg>
-					
-					<div class="absolute inset-0 flex flex-col items-center justify-center">
-						<span class="text-5xl font-serif font-bold text-white">
-							{Math.ceil(PRAYING_TIME - prayerProgress)}
-						</span>
-						{#if isPraying}
-							<span class="text-zen-gold text-sm mt-1">Đang cầu nguyện</span>
-						{:else}
-							<span class="text-white/40 text-xs mt-1">Chờ đợi</span>
-						{/if}
-					</div>
 				</div>
-
-				{#if !isPraying}
-					<div class="mt-8 px-6">
-						<p class="text-white/60 text-center">
-							Chắp hai tay trước ngực<br />
-							<span class="text-zen-gold text-sm">Giữ yên trong 10 giây liên tục</span>
-						</p>
-					</div>
-				{:else}
-					<div class="mt-6">
-						<p class="text-zen-gold/80 text-sm">
-							Giữ nguyên tư thế... {Math.ceil(PRAYING_TIME - prayerProgress)}s
-						</p>
+				
+				<!-- Instruction -->
+				<p class="text-white text-center font-medium">
+					{statusText()}
+				</p>
+				
+				<!-- Prayer Quality Bar -->
+				{#if !isPraying && trackingConfidence > 30}
+					<div class="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+						<div 
+							class="h-full rounded-full transition-all duration-300"
+							class:bg-green-400={prayerQuality >= 80}
+							class:bg-yellow-400={prayerQuality >= 50 && prayerQuality < 80}
+							class:bg-orange-400={prayerQuality >= 30 && prayerQuality < 50}
+							class:bg-red-400={prayerQuality < 30}
+							style="width: {prayerQuality}%"
+						></div>
 					</div>
 				{/if}
 			</div>
-		{/if}
-	</main>
-
-	<!-- Bottom Hint -->
-	{#if cameraActive && !cameraError}
-		<div class="absolute bottom-8 left-0 right-0 text-center z-30">
-			{#if !isPraying}
-				<p class="text-white/30 text-xs">
-					Đưa hai tay vào khung hình để bắt đầu
-				</p>
-			{:else}
-				<p class="text-zen-gold/40 text-xs">
-					Tách tay ra để dừng
-				</p>
-			{/if}
 		</div>
 	{/if}
 </div>
