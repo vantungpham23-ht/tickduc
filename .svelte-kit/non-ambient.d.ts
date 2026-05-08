@@ -29,7 +29,7 @@ declare module "$app/types" {
 	type MatcherParam<M> = M extends (param : string) => param is (infer U extends string) ? U : string;
 
 	export interface AppTypes {
-		RouteId(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/profile" | "/settings" | "/setup-profile";
+		RouteId(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/mokugyo" | "/praying" | "/profile" | "/settings" | "/setup-profile";
 		RouteParams(): {
 			
 		};
@@ -41,12 +41,14 @@ declare module "$app/types" {
 			"/guide": Record<string, never>;
 			"/leaderboard": Record<string, never>;
 			"/meditate": Record<string, never>;
+			"/mokugyo": Record<string, never>;
+			"/praying": Record<string, never>;
 			"/profile": Record<string, never>;
 			"/settings": Record<string, never>;
 			"/setup-profile": Record<string, never>
 		};
-		Pathname(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/profile" | "/settings" | "/setup-profile";
+		Pathname(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/mokugyo" | "/praying" | "/profile" | "/settings" | "/setup-profile";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/.DS_Store" | "/bell.mp3" | "/robots.txt" | string & {};
+		Asset(): "/.DS_Store" | "/bell.mp3" | "/medi.mp3" | "/medi2.mp3" | "/mokugyo.mp3" | "/robots.txt" | string & {};
 	}
 }

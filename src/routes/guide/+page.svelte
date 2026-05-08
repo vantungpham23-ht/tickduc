@@ -1,85 +1,171 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft } from 'lucide-svelte';
-	import BottomNav from '$lib/components/BottomNav.svelte';
 
-	const steps = [
-		{
-			step: 1,
-			title: 'Bắt đầu',
-			description: 'Chọn bắt đầu thiền từ màn hình chính',
-			icon: `<svg class="w-full h-full" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2">
-				<circle cx="40" cy="40" r="30" stroke-dasharray="4 4"/>
-				<path d="M35 30l15 10-15 10z" fill="currentColor"/>
-			</svg>`,
-			tip: 'Tìm nơi yên tĩnh, thoải mái'
+	type GuideMode = 'thien' | 'hanhdao' | 'gomo';
+
+	let activeMode = $state<GuideMode>('thien');
+
+	const guides = {
+		thien: {
+			title: 'Thiền',
+			subtitle: 'Tĩnh tâm mỗi ngày',
+			color: '#93B1A7',
+			steps: [
+				{
+					step: 1,
+					title: 'Chuẩn bị',
+					description: 'Tìm nơi yên tĩnh, ngồi trên ghế hoặc trải tatami. Giữ lưng thẳng, thư giãn vai.',
+					tip: 'Nên thiền vào sáng sớm hoặc tối muộn'
+				},
+				{
+					step: 2,
+					title: 'Mở camera',
+					description: 'Bật camera để ứng dụng theo dõi tư thế của bạn. Đặt điện thoại sao cho thấy rõ 2 tay.',
+					tip: 'Đặt điện thoại cách bạn khoảng 1-2 mét'
+				},
+				{
+					step: 3,
+					title: 'Tư thế thiền',
+					description: 'Đặt 2 tay lên 2 đầu gối, lòng bàn tay hướng lên trên. Thư giãn, mắt nhắm nhẹ.',
+					tip: 'Đảm bảo 2 tay đều nằm trong khung hình camera'
+				},
+				{
+					step: 4,
+					title: 'Thiền 10 phút',
+					description: 'Hít thở đều đặn, tập trung vào hơi thở. Đếm thầm từ 1 đến 10 rồi lặp lại.',
+					tip: 'Nếu tay di chuyển, đếm sẽ dừng và bạn cần đặt tay lại'
+				},
+				{
+					step: 5,
+					title: 'Nhận công đức',
+					description: 'Sau 10 phút thiền, bạn sẽ được cộng 1 công đức. Nhạc thiền sẽ phát khi đang thiền.',
+					tip: 'Thiền đều đặn mỗi ngày để tích lũy công đức'
+				}
+			]
 		},
-		{
-			step: 2,
-			title: 'Chắp tay',
-			description: 'Đưa hai lòng bàn tay chạm nhau trước ngực',
-			icon: `<svg class="w-full h-full" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2">
-				<path d="M25 60 C25 40 35 25 40 20 C45 25 55 40 55 60"/>
-				<ellipse cx="40" cy="55" rx="15" ry="10" fill="currentColor" opacity="0.3"/>
-				<path d="M30 45 L40 35 L50 45" stroke-width="1.5"/>
-				<path d="M25 50 C20 45 20 35 30 30" stroke-width="1.5"/>
-				<path d="M55 50 C60 45 60 35 50 30" stroke-width="1.5"/>
-			</svg>`,
-			tip: 'Hai bàn tay khép chặt, ngón tay đặt sát nhau'
+		hanhdao: {
+			title: 'Hành Đạo',
+			subtitle: 'Chắp tay tụng kinh',
+			color: '#C5A059',
+			steps: [
+				{
+					step: 1,
+					title: 'Chuẩn bị',
+					description: 'Đứng hoặc ngồi thẳng lưng. Hai tay đặt trước ngực, khuyu nhẹ đầu xuống.',
+					tip: 'Nên thực hiện trước bàn thờ hoặc nơi trang nghiêm'
+				},
+				{
+					step: 2,
+					title: 'Mở camera',
+					description: 'Bật camera để ứng dụng theo dõi 2 tay của bạn. Đặt điện thoại sao cho thấy rõ 2 bàn tay.',
+					tip: 'Đảm bảo ánh sáng đủ để camera nhận diện tay'
+				},
+				{
+					step: 3,
+					title: 'Chắp tay',
+					description: 'Hai lòng bàn tay chạm nhau, các ngón tay khép chặt, đặt trước ngực. Giữ tư thế này.',
+					tip: 'Hai tay cần gần nhau để ứng dụng nhận diện'
+				},
+				{
+					step: 4,
+					title: 'Giữ 10 giây',
+					description: 'Duy trì tư thế chắp tay trong 10 giây. Đọc thầm: "Nam mô A Di Đà Phật" hoặc tên Đức Phật bạn mến.',
+					tip: 'Nếu 2 tay tách ra, đếm sẽ bắt đầu lại'
+				},
+				{
+					step: 5,
+					title: 'Nhận công đức',
+					description: 'Sau 10 giây, bạn được +1 công đức. Tiếng mõ sẽ vang lên xác nhận.',
+					tip: 'Có thể thực hiện nhiều lần liên tiếp'
+				}
+			]
 		},
-		{
-			step: 3,
-			title: 'Giữ yên',
-			description: 'Duy trì tư thế chắp tay trong 10 giây',
-			icon: `<svg class="w-full h-full" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2">
-				<circle cx="40" cy="40" r="25" stroke-dasharray="2 2"/>
-				<path d="M40 25 L40 35 M40 45 L40 55 M25 40 L35 40 M45 40 L55 40" stroke-width="1.5"/>
-				<circle cx="40" cy="40" r="8" fill="currentColor" opacity="0.5"/>
-				<path d="M40 32 L40 40 L46 40" stroke-width="1.5"/>
-			</svg>`,
-			tip: 'Hít thở đều, tâm an tĩnh, mắt nhắm nhẹ'
-		},
-		{
-			step: 4,
-			title: 'Nhận công đức',
-			description: 'Sau khi giữ đủ 10 giây, bạn sẽ tích lũy được công đức',
-			icon: `<svg class="w-full h-full" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2">
-				<ellipse cx="40" cy="70" rx="12" ry="4" fill="currentColor" opacity="0.2"/>
-				<path d="M40 60 C40 60 28 48 28 38 C28 28 40 16 40 16 C40 16 52 28 52 38 C52 48 40 60 40 60" fill="currentColor" opacity="0.3"/>
-				<path d="M28 54 C20 42 14 34 14 26 C14 18 26 12 34 16" fill="currentColor" opacity="0.2"/>
-				<path d="M52 54 C60 42 66 34 66 26 C66 18 54 12 46 16" fill="currentColor" opacity="0.2"/>
-				<circle cx="40" cy="35" r="4" fill="currentColor"/>
-			</svg>`,
-			tip: 'Mỗi ngày tích lũy, công đức sẽ tăng trưởng'
+		gomo: {
+			title: 'Gõ Mõ',
+			subtitle: 'Tụng kinh 108 lần',
+			color: '#8B7355',
+			steps: [
+				{
+					step: 1,
+					title: 'Chuẩn bị',
+					description: 'Tìm nơi yên tĩnh. Bạn có thể ngồi thiền hoặc đứng trước bàn thờ.',
+					tip: 'Chuẩn bị tràng hạt để đếm nếu muốn'
+				},
+				{
+					step: 2,
+					title: 'Mở ứng dụng',
+					description: 'Gõ Mõ không cần camera. Chỉ cần mở ứng dụng và bắt đầu gõ.',
+					tip: 'Có thể thực hiện ở bất kỳ đâu'
+				},
+				{
+					step: 3,
+					title: 'Gõ mõ',
+					description: 'Nhấn vào mõ trên màn hình hoặc gõ tay trên bàn (nếu có cảm biến). Mỗi lần gõ = 1 lần tụng kinh.',
+					tip: 'Gõ đều nhịp, không quá nhanh hay quá chậm'
+				},
+				{
+					step: 4,
+					title: 'Đếm 108',
+					description: 'Gõ đủ 108 lần để hoàn thành 1 chuỗi tụng kinh. Đọc thầm: "Nam mô Phật Thích Ca Mâu Ni" mỗi lần gõ.',
+					tip: '108 là con số thiêng liêng trong Phật giáo'
+				},
+				{
+					step: 5,
+					title: 'Nhận công đức',
+					description: 'Khi đạt 108 lần gõ, bạn được +1 công đức. Tiếng mõ sẽ vang lên nhiều hơn để chúc mừng.',
+					tip: 'Có thể tụng nhiều chuỗi liên tiếp'
+				}
+			]
 		}
-	];
+	};
 
 	let currentStep = $state(0);
+
+	function selectMode(mode: GuideMode) {
+		activeMode = mode;
+		currentStep = 0;
+	}
+
+	function goToPractice() {
+		if (activeMode === 'thien') goto('/meditate');
+		else if (activeMode === 'hanhdao') goto('/praying');
+		else goto('/mokugyo');
+	}
+
+	let currentGuide = $derived(guides[activeMode]);
 </script>
 
-<div class="min-h-screen bg-zen-cream pb-24">
+<div class="min-h-screen bg-[#F7F3F0] pb-20">
 	<!-- Header -->
-	<header class="relative px-6 pt-8 pb-4">
-		<button 
-			onclick={() => goto('/dashboard')}
-			class="absolute left-4 top-8 p-2 rounded-full bg-zen-parchment/80 backdrop-blur-sm"
-		>
-			<ArrowLeft class="w-5 h-5 text-zen-brown" />
-		</button>
-		
-		<div class="text-center">
-			<h1 class="font-serif text-2xl font-light text-zen-brown-deep tracking-wide">Hướng dẫn</h1>
-			<p class="text-zen-brown-warm/60 text-sm mt-1">Hành trình tích công đức</p>
-		</div>
+	<header class="px-6 pt-8 pb-4 text-center">
+		<h1 class="font-serif text-2xl font-light text-[#3D3028] tracking-wide">Hướng dẫn</h1>
+		<p class="text-[#3D3028]/50 text-sm mt-1">Hành trình tích công đức</p>
 	</header>
 
+	<!-- Mode tabs -->
+	<div class="px-6 mb-4">
+		<div class="flex bg-[#EDE8E3]/60 rounded-2xl p-1">
+			{#each Object.entries(guides) as [key, guide]}
+				<button
+					onclick={() => selectMode(key as GuideMode)}
+					class="flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all {activeMode === key ? `bg-white text-[${guide.color}] shadow-sm` : 'text-[#3D3028]/50'}"
+					style="color: {activeMode === key ? guide.color : undefined}"
+				>
+					{guide.title}
+				</button>
+			{/each}
+		</div>
+	</div>
+
 	<!-- Progress indicator -->
-	<div class="px-6 mb-6">
+	<div class="px-6 mb-4">
 		<div class="flex items-center justify-center gap-2">
-			{#each steps as step, i}
-				<div 
-					class="h-1 rounded-full transition-all duration-500 {i <= currentStep ? 'bg-zen-gold w-8' : 'bg-zen-linen w-4'}"
-				></div>
+			{#each currentGuide.steps as step, i}
+				<button
+					onclick={() => currentStep = i}
+					class="h-1.5 rounded-full transition-all duration-300 {i <= currentStep ? '' : 'bg-[#E8E0D8]'}"
+					style="width: {i <= currentStep ? '24px' : '12px'}; background-color: {i <= currentStep ? currentGuide.color : undefined}"
+				></button>
 			{/each}
 		</div>
 	</div>
@@ -87,33 +173,38 @@
 	<!-- Main content -->
 	<div class="px-6">
 		<!-- Step card -->
-		<div class="bg-zen-parchment/60 backdrop-blur-sm rounded-3xl p-6 mb-6">
-			<!-- Icon -->
-			<div class="w-24 h-24 mx-auto mb-6 text-zen-gold">
-				{@html steps[currentStep].icon}
-			</div>
-			
+		<div class="bg-[#EDE8E3]/60 rounded-3xl p-6 mb-6">
 			<!-- Step number -->
-			<div class="flex items-center justify-center gap-2 mb-3">
-				<span class="text-zen-gold text-sm font-medium">Bước {steps[currentStep].step}</span>
-				<span class="text-zen-brown-warm/30">•</span>
-				<span class="text-zen-brown-warm/60 text-sm">{currentStep + 1}/{steps.length}</span>
+			<div class="flex items-center justify-center gap-2 mb-4">
+				<span class="text-sm font-medium" style="color: {currentGuide.color}">
+					Bước {currentGuide.steps[currentStep].step}
+				</span>
+				<span class="text-[#3D3028]/20">•</span>
+				<span class="text-[#3D3028]/50 text-sm">
+					{currentStep + 1}/{currentGuide.steps.length}
+				</span>
 			</div>
 			
 			<!-- Title -->
-			<h2 class="font-serif text-xl text-zen-brown-deep text-center mb-3">
-				{steps[currentStep].title}
+			<h2 class="font-serif text-xl text-[#3D3028] text-center mb-3">
+				{currentGuide.steps[currentStep].title}
 			</h2>
 			
 			<!-- Description -->
-			<p class="text-zen-brown-warm/70 text-center leading-relaxed">
-				{steps[currentStep].description}
+			<p class="text-[#3D3028]/70 text-center leading-relaxed">
+				{currentGuide.steps[currentStep].description}
 			</p>
 			
 			<!-- Tip -->
-			<div class="mt-4 px-4 py-3 bg-zen-sage/10 rounded-xl">
-				<p class="text-zen-sage text-sm text-center">
-					💡 {steps[currentStep].tip}
+			<div 
+				class="mt-4 px-4 py-3 rounded-xl"
+				style="background-color: {currentGuide.color}15"
+			>
+				<p 
+					class="text-sm text-center"
+					style="color: {currentGuide.color}"
+				>
+					💡 {currentGuide.steps[currentStep].tip}
 				</p>
 			</div>
 		</div>
@@ -123,57 +214,73 @@
 			{#if currentStep > 0}
 				<button
 					onclick={() => currentStep--}
-					class="flex-1 py-3 px-4 bg-zen-parchment rounded-xl text-zen-brown-warm font-medium"
+					class="flex-1 py-3 px-4 bg-[#EDE8E3] rounded-xl text-[#3D3028] font-medium"
 				>
 					Quay lại
 				</button>
 			{:else}
 				<button
 					onclick={() => goto('/dashboard')}
-					class="flex-1 py-3 px-4 bg-zen-parchment rounded-xl text-zen-brown-warm font-medium"
+					class="flex-1 py-3 px-4 bg-[#EDE8E3] rounded-xl text-[#3D3028] font-medium"
 				>
 					Đóng
 				</button>
 			{/if}
 			
-			{#if currentStep < steps.length - 1}
+			{#if currentStep < currentGuide.steps.length - 1}
 				<button
 					onclick={() => currentStep++}
-					class="flex-1 py-3 px-4 bg-zen-gold/20 rounded-xl text-zen-brown-deep font-medium hover:bg-zen-gold/30 transition-colors"
+					class="flex-1 py-3 px-4 rounded-xl text-white font-medium transition-colors"
+					style="background-color: {currentGuide.color}"
 				>
 					Tiếp tục
 				</button>
 			{:else}
 				<button
-					onclick={() => goto('/meditate')}
-					class="flex-1 py-3 px-4 bg-gradient-to-r from-zen-gold/30 to-zen-gold/20 rounded-xl text-zen-brown-deep font-medium hover:from-zen-gold/40 hover:to-zen-gold/30 transition-colors"
+					onclick={goToPractice}
+					class="flex-1 py-3 px-4 rounded-xl text-white font-medium transition-colors"
+					style="background-color: {currentGuide.color}"
 				>
-					Bắt đầu thiền
+					Bắt đầu
 				</button>
 			{/if}
 		</div>
 
-		<!-- Illustration -->
-		<div class="mt-8 relative">
-			<div class="absolute inset-0 bg-zen-gold/5 rounded-3xl blur-xl"></div>
-			<div class="relative bg-zen-parchment/40 rounded-3xl p-6 text-center">
-				<div class="w-20 h-20 mx-auto mb-4 relative">
-					<!-- Animated lotus -->
-					<svg viewBox="0 0 80 80" class="w-full h-full text-zen-gold/40 animate-breathe">
-						<ellipse cx="40" cy="70" rx="15" ry="5" fill="currentColor"/>
-						<path d="M40 55 C40 55 25 40 25 28 C25 16 40 5 40 5 C40 5 55 16 55 28 C55 40 40 55 40 55" fill="currentColor"/>
-						<path d="M25 48 C15 35 8 25 8 15 C8 5 22 2 32 8" fill="currentColor"/>
-						<path d="M55 48 C65 35 72 25 72 15 C72 5 58 2 48 8" fill="currentColor"/>
+		<!-- Practice card -->
+		<div class="mt-6 bg-[#EDE8E3]/40 rounded-2xl p-5 text-center">
+			<div class="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style="background-color: {currentGuide.color}20">
+				{#if activeMode === 'thien'}
+					<svg class="w-8 h-8" style="color: {currentGuide.color}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<circle cx="12" cy="8" r="4"/>
+						<path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
 					</svg>
-					<!-- Glow ring -->
-					<div class="absolute inset-0 rounded-full border border-zen-gold/20 animate-ping" style="animation-duration: 3s;"></div>
-				</div>
-				<p class="text-zen-brown-warm/50 text-sm italic">
-					"Tâm an thì phúc tự đến"
-				</p>
+				{:else if activeMode === 'hanhdao'}
+					<svg class="w-8 h-8" style="color: {currentGuide.color}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<path d="M12 2L12 6"/>
+						<path d="M12 18L12 22"/>
+						<circle cx="12" cy="12" r="4"/>
+						<path d="M4.93 4.93L7.76 7.76"/>
+						<path d="M16.24 16.24L19.07 19.07"/>
+						<path d="M2 12L6 12"/>
+						<path d="M18 12L22 12"/>
+					</svg>
+				{:else}
+					<svg class="w-8 h-8" style="color: {currentGuide.color}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<ellipse cx="12" cy="14" rx="8" ry="6"/>
+						<path d="M12 8V6"/>
+						<ellipse cx="12" cy="5" rx="3" ry="2"/>
+					</svg>
+				{/if}
 			</div>
+			<p class="text-[#3D3028]/60 text-sm">
+				{currentGuide.title} • {currentGuide.subtitle}
+			</p>
 		</div>
 	</div>
 </div>
 
-<BottomNav currentRoute="/dashboard" />
+<style>
+	.font-serif {
+		font-family: 'Playfair Display', Georgia, serif;
+	}
+</style>

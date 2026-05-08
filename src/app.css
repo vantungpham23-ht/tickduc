@@ -57,243 +57,36 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ========================================
-   ZEN ANIMATIONS - Quiet Luxury
+   ALL ANIMATIONS DISABLED
    ======================================== */
 
-/* Breathing - slow, organic, zen */
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 0.9;
-  }
-}
-
-@keyframes breathe-subtle {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
-
-/* Lotus Bloom - delicate opening */
-@keyframes lotus-bloom {
-  0% {
-    transform: scale(0.8) rotate(-5deg);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05) rotate(2deg);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-}
-
-/* Floating Petal - gentle drift */
-@keyframes float-petal {
-  0% {
-    transform: translateY(0) rotate(0deg) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.7;
-  }
-  90% {
-    opacity: 0.7;
-  }
-  100% {
-    transform: translateY(-150px) rotate(180deg) translateX(30px);
-    opacity: 0;
-  }
-}
-
-/* Ink Diffusion - zen brush stroke feel */
-@keyframes ink-diffuse {
-  0% {
-    transform: scale(0);
-    opacity: 0.5;
-    filter: blur(10px);
-  }
-  50% {
-    opacity: 0.3;
-    filter: blur(5px);
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-    filter: blur(0px);
-  }
-}
-
-/* Ripple - water meditation */
-@keyframes ripple {
-  0% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(3);
-    opacity: 0;
-  }
-}
-
-/* Gentle Glow */
-@keyframes gentle-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(201, 184, 150, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(201, 184, 150, 0.3);
-  }
-}
-
-/* Fade In Up - soft entrance */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Float drift - impermanence */
-@keyframes float-drift {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  25% {
-    transform: translateY(-8px) rotate(2deg);
-  }
-  50% {
-    transform: translateY(-4px) rotate(-1deg);
-  }
-  75% {
-    transform: translateY(-10px) rotate(1deg);
-  }
-}
-
-/* Aura pulse - spiritual */
-@keyframes aura-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(201, 184, 150, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 20px rgba(201, 184, 150, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(201, 184, 150, 0);
-  }
-}
-
-/* Shimmer - like light on water */
-@keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-
-/* Rotate slow - like prayer wheel */
-@keyframes rotate-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* Animations removed for performance */
 
 /* ========================================
-   ANIMATION CLASSES
+   ANIMATION CLASSES - DISABLED
    ======================================== */
 
-.animate-breathe {
-  animation: breathe 4s ease-in-out infinite;
-}
-
-.animate-breathe-subtle {
-  animation: breathe-subtle 6s ease-in-out infinite;
-}
-
-.animate-lotus-bloom {
-  animation: lotus-bloom 2s ease-out forwards;
-}
-
-.animate-float-petal {
-  animation: float-petal 8s ease-in-out infinite;
-}
-
-.animate-ink-diffuse {
-  animation: ink-diffuse 3s ease-out infinite;
-}
-
-.animate-ripple {
-  animation: ripple 2s ease-out infinite;
-}
-
-.animate-gentle-glow {
-  animation: gentle-glow 4s ease-in-out infinite;
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 1s ease-out forwards;
-}
-
-.animate-float-drift {
-  animation: float-drift 6s ease-in-out infinite;
-}
-
-.animate-aura-pulse {
-  animation: aura-pulse 2s ease-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-.animate-rotate-slow {
-  animation: rotate-slow 20s linear infinite;
-}
-
-/* Staggered children */
-.stagger-children > * {
-  opacity: 0;
-  animation: fadeInUp 0.8s ease-out forwards;
-}
-
-.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
-.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
-.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
-.stagger-children > *:nth-child(7) { animation-delay: 0.7s; }
+/* All animate-* classes are disabled */
+/*
+.animate-breathe { animation: breathe 4s ease-in-out infinite; }
+.animate-breathe-subtle { animation: breathe-subtle 6s ease-in-out infinite; }
+.animate-lotus-bloom { animation: lotus-bloom 2s ease-out forwards; }
+.animate-float-petal { animation: float-petal 8s ease-in-out infinite; }
+.animate-ink-diffuse { animation: ink-diffuse 3s ease-out infinite; }
+.animate-ripple { animation: ripple 2s ease-out infinite; }
+.animate-gentle-glow { animation: gentle-glow 4s ease-in-out infinite; }
+.animate-fade-in-up { animation: fadeInUp 1s ease-out forwards; }
+.animate-float-drift { animation: float-drift 6s ease-in-out infinite; }
+.animate-aura-pulse { animation: aura-pulse 2s ease-out infinite; }
+.animate-shimmer { animation: shimmer 3s ease-in-out infinite; }
+.animate-rotate-slow { animation: rotate-slow 20s linear infinite; }
+.stagger-children > * { animation: fadeInUp 0.8s ease-out forwards; }
+*/
 
 /* ========================================
    GRADIENT UTILITIES
    ======================================== */
 
-/* Warm zen gradient */
 .gradient-zen-warm {
   background: linear-gradient(135deg, var(--color-zen-cream) 0%, var(--color-zen-parchment) 50%, var(--color-zen-linen) 100%);
 }
@@ -350,20 +143,4 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-.text-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--color-zen-brown) 0%,
-    var(--color-zen-gold) 25%,
-    var(--color-zen-brown-warm) 50%,
-    var(--color-zen-gold) 75%,
-    var(--color-zen-brown) 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s ease-in-out infinite;
 }

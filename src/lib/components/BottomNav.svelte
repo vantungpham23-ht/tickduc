@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { Home, Wind, Award, User } from 'lucide-svelte';
-
 	interface Props {
 		currentRoute: string;
 	}
@@ -8,33 +6,44 @@
 	let { currentRoute }: Props = $props();
 
 	const navItems = [
-		{ route: '/dashboard', icon: Home, label: 'Trang chủ' },
-		{ route: '/meditate', icon: Wind, label: 'Thiền' },
-		{ route: '/leaderboard', icon: Award, label: 'Đạo hạnh' },
-		{ route: '/profile', icon: User, label: 'Cá nhân' },
+		{ route: '/dashboard', label: 'Trang chủ' },
+		{ route: '/leaderboard', label: 'Đạo hạnh' },
+		{ route: '/profile', label: 'Cá nhân' },
 	];
 </script>
 
-<nav class="fixed bottom-0 left-0 right-0 bg-zen-cream/95 backdrop-blur-lg border-t border-zen-linen px-4 py-2 pb-5 z-50">
+<nav class="fixed bottom-0 left-0 right-0 bg-[#F7F3F0]/95 backdrop-blur-md border-t border-[#E8E0D8] px-4 py-2 pb-6 z-50">
 	<div class="flex items-center justify-around max-w-md mx-auto">
 		{#each navItems as item}
 			{@const isActive = currentRoute === item.route}
 			<a
 				href={item.route}
-				class="flex flex-col items-center py-1 px-3 min-w-[65px] transition-all duration-300"
+				class="flex flex-col items-center py-2 px-5 min-w-[80px] transition-all duration-300"
 			>
 				<div 
-					class="w-11 h-11 rounded-2xl flex items-center justify-center mb-1 transition-all duration-300 {isActive ? 'bg-zen-gold/15 shadow-sm' : 'bg-transparent'}"
+					class="w-11 h-11 rounded-2xl flex items-center justify-center mb-1 transition-all duration-300 {isActive ? 'bg-[#C5A059]/15' : 'bg-transparent'}"
 				>
-					<item.icon 
-						class="w-5 h-5 transition-all duration-300 {isActive ? 'text-zen-brown-deep scale-110' : 'text-zen-brown-warm/50'}" 
-						strokeWidth={1.5} 
-					/>
+					{#if item.route === '/dashboard'}
+						<svg class="w-5 h-5 transition-all duration-300 {isActive ? 'text-[#3D3028] scale-110' : 'text-[#3D3028]/40'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+							<polyline points="9 22 9 12 15 12 15 22"/>
+						</svg>
+					{:else if item.route === '/leaderboard'}
+						<svg class="w-5 h-5 transition-all duration-300 {isActive ? 'text-[#3D3028] scale-110' : 'text-[#3D3028]/40'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="8" r="6"/>
+							<path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+						</svg>
+					{:else if item.route === '/profile'}
+						<svg class="w-5 h-5 transition-all duration-300 {isActive ? 'text-[#3D3028] scale-110' : 'text-[#3D3028]/40'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+						</svg>
+					{/if}
 				</div>
-				<span class="text-[11px] transition-all duration-300 {isActive ? 'text-zen-brown-deep font-medium' : 'text-zen-brown-warm/50'}">{item.label}</span>
+				<span class="text-[11px] tracking-wide transition-all duration-300 {isActive ? 'text-[#3D3028] font-medium' : 'text-[#3D3028]/40'}">{item.label}</span>
 				
 				{#if isActive}
-					<div class="w-1 h-1 rounded-full bg-zen-gold mt-1 animate-breathe-subtle"></div>
+					<div class="w-1 h-1 rounded-full bg-[#C5A059] mt-1"></div>
 				{/if}
 			</a>
 		{/each}
