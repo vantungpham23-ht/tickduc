@@ -84,6 +84,19 @@
 		}
 	}
 
+	async function handleLogout() {
+		try {
+			await supabase.auth.signOut();
+			localStorage.removeItem('isGuest');
+			localStorage.removeItem('guestMerit');
+			localStorage.removeItem('guestDharmaName');
+			localStorage.removeItem('guestAvatarEmoji');
+			goto('/');
+		} catch (error) {
+			console.error('Error logging out:', error);
+		}
+	}
+
 	onMount(() => {
 		fetchUserData();
 	});
@@ -226,9 +239,24 @@
 				</p>
 				<button
 					onclick={() => goto('/auth')}
-					class="mt-3 px-6 py-3 bg-zen-gold text-white rounded-full font-medium hover:bg-zen-gold/90 transition-colors"
+					class="mt-3 px-6 py-3 bg-zen-gold text-zen-cream rounded-full font-medium hover:bg-zen-gold/90 transition-colors"
 				>
 					Đăng nhập
+				</button>
+			</div>
+		{:else}
+			<!-- Logout Button -->
+			<div class="mt-6">
+				<button
+					onclick={handleLogout}
+					class="w-full py-3 bg-zen-linen text-zen-brown-warm rounded-xl font-medium hover:bg-zen-brown/10 transition-colors flex items-center justify-center gap-2"
+				>
+					<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+						<polyline points="16,17 21,12 16,7"/>
+						<line x1="21" y1="12" x2="9" y2="12"/>
+					</svg>
+					Đăng xuất
 				</button>
 			</div>
 		{/if}

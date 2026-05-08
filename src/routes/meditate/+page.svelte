@@ -3,6 +3,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 	import { supabase } from '$lib/supabase';
+	import ZenEffects from '$lib/components/ZenEffects.svelte';
 
 	// State
 	let videoElement: HTMLVideoElement;
@@ -829,6 +830,9 @@
 		height={720}
 		style="transform: scaleX(-1);"
 	></canvas>
+
+	<!-- Zen Effects: Falling petals, fireflies, ambient particles -->
+	<ZenEffects showEffects={cameraActive && !cameraError} burstTrigger={totalMerits} />
 
 	<!-- Dark Overlay -->
 	<div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
