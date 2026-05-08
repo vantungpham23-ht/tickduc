@@ -40,7 +40,7 @@
 	}
 </script>
 
-<div class="min-h-screen bg-zen-beige flex flex-col">
+<div class="min-h-screen bg-zen-cream flex flex-col">
 	<!-- Header -->
 	<header class="px-4 py-4">
 		<button onclick={() => goto('/auth')} class="p-2 rounded-full hover:bg-zen-brown/5 transition-colors">
@@ -72,7 +72,7 @@
 					type="text"
 					placeholder="Nhập pháp danh của bạn"
 					bind:value={dharmaName}
-					class="w-full px-6 py-5 bg-zen-white border-2 border-zen-gold/30 rounded-3xl text-zen-brown text-center text-xl placeholder:text-zen-brown/30 focus:outline-none focus:border-zen-gold focus:ring-4 focus:ring-zen-gold/20 transition-all"
+					class="w-full px-6 py-5 bg-zen-cream border-2 border-zen-gold/30 rounded-3xl text-zen-brown text-center text-xl placeholder:text-zen-brown/30 focus:outline-none focus:border-zen-gold focus:ring-4 focus:ring-zen-gold/20 transition-all focus-visible:ring-2 focus-visible:ring-zen-gold/30 focus-visible:ring-offset-2"
 				/>
 			</div>
 
@@ -80,7 +80,7 @@
 			<button
 				onclick={saveProfile}
 				disabled={!dharmaName.trim() || isLoading}
-				class="w-full py-4 bg-zen-brown text-zen-white rounded-2xl font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+				class="w-full py-4 bg-zen-brown text-zen-cream rounded-2xl font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
 				{#if isLoading}
 					<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

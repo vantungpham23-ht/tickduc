@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Settings, Camera, CameraOff, AlertCircle } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 	import { supabase } from '$lib/supabase';
@@ -38,7 +37,7 @@
 	let totalMerits = $state(0);
 	let showAuraFlash = $state(false);
 
-	// Aura particles
+	// Aura particles - Zen style (lightweight)
 	let auraParticles: Array<{
 		x: number;
 		y: number;
@@ -47,7 +46,12 @@
 		life: number;
 		maxLife: number;
 		size: number;
+		opacity: number;
 	}> = [];
+
+	// Zen aura state
+	let auraIntensity = $state(0); // 0-1 for breathing effect
+	let zenGlowPhase = 0;
 
 	// Audio
 	let bellAudio: HTMLAudioElement;
@@ -224,9 +228,10 @@
 		ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
 		if (results.landmarks && results.landmarks.length > 0) {
-			// Tracking tốt - màu vàng gold
-			const color = isPraying ? '#C5A059' : 'rgba(0, 255, 255, 0.8)';
-			const dotSize = 5;
+			// Zen warm gold color
+			const color = isPraying ? '#C9B896' : 'rgba(201, 184, 150, 0.7)';
+			const dotSize = 4;
+			const lineWidth = 2;
 			
 			for (const landmarks of results.landmarks) {
 				const connections = [
@@ -239,7 +244,8 @@
 				];
 
 				ctx.strokeStyle = color;
-				ctx.lineWidth = 3;
+				ctx.lineWidth = lineWidth;
+				ctx.lineCap = 'round';
 
 				for (const [start, end] of connections) {
 					const startPoint = landmarks[start];
@@ -258,28 +264,18 @@
 				}
 			}
 		} else if (isTrackingLost) {
-			// Không có hands - vẽ icon tìm kiếm nhẹ ở giữa
+			// Zen searching indicator - soft, non-distracting
 			const centerX = canvasElement.width / 2;
 			const centerY = canvasElement.height / 2;
 			
 			ctx.save();
-			ctx.strokeStyle = 'rgba(255, 200, 100, 0.4)';
-			ctx.lineWidth = 2;
-			ctx.setLineDash([5, 5]);
+			ctx.strokeStyle = 'rgba(201, 184, 150, 0.3)';
+			ctx.lineWidth = 1.5;
+			ctx.setLineDash([4, 4]);
 			
-			// Vẽ vòng tròn tìm kiếm
+			// Gentle searching circle
 			ctx.beginPath();
-			ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
-			ctx.stroke();
-			
-			// Vẽ mũi tên
-			ctx.setLineDash([]);
-			ctx.beginPath();
-			ctx.moveTo(centerX + 20, centerY + 20);
-			ctx.lineTo(centerX, centerY);
-			ctx.lineTo(centerX + 15, centerY);
-			ctx.moveTo(centerX, centerY);
-			ctx.lineTo(centerX, centerY + 15);
+			ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
 			ctx.stroke();
 			ctx.restore();
 		}
@@ -291,7 +287,7 @@
 
 		ctx.clearRect(0, 0, auraCanvas.width, auraCanvas.height);
 
-		// Không vẽ aura nếu tracking bị mất hoàn toàn
+		// Skip if no tracking and no flash
 		if (trackingConfidence === 0 && !showAuraFlash) return;
 
 		const centerX = bodyCenterX * auraCanvas.width;
@@ -300,183 +296,260 @@
 		const height = bodyHeight * auraCanvas.height;
 
 		if (showAuraFlash) {
-			// Draw burst particles when merit triggers
-			drawAuraBurst(ctx, centerX, centerY, width, height);
+			// Zen lotus bloom burst - elegant and smooth
+			drawZenBurst(ctx, centerX, centerY, width, height);
 		} else if (trackingConfidence > 10) {
-			// Tính opacity dựa trên tracking confidence
+			// Zen breathing aura - soft, organic, meditative
 			const fadeAlpha = Math.min(1, trackingConfidence / 70);
-			// Draw tracking body outline aura với fade effect
-			drawBodyOutlineAura(ctx, centerX, centerY, width, height, fadeAlpha);
+			drawZenAura(ctx, centerX, centerY, width, height, fadeAlpha);
 		}
 
-		// Draw floating particles
-		drawParticles(ctx);
+		// Draw floating light orbs (lite version)
+		drawZenParticles(ctx);
 	}
 
-	function drawBodyOutlineAura(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, width: number, height: number, fadeAlpha: number = 1) {
-		// Create neon glow layers with cyan/blue gradient
-		const layers = [
-			{ scale: 1.6, alpha: 0.08, blur: 60 },
-			{ scale: 1.4, alpha: 0.12, blur: 40 },
-			{ scale: 1.25, alpha: 0.18, blur: 25 },
-			{ scale: 1.15, alpha: 0.25, blur: 15 },
-			{ scale: 1.0, alpha: 0.4, blur: 8 }
-		];
+	function drawZenAura(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, width: number, height: number, fadeAlpha: number = 1) {
+		// Zen breathing phase - slow, organic rhythm
+		zenGlowPhase += 0.02;
+		const breathePhase = (Math.sin(zenGlowPhase) + 1) / 2; // 0 to 1
+		auraIntensity = 0.3 + breathePhase * 0.3; // Oscillates between 0.3 and 0.6
 
-		for (const layer of layers) {
-			ctx.save();
-			ctx.filter = `blur(${layer.blur}px)`;
-			
-			ctx.beginPath();
-			ctx.ellipse(
-				centerX,
-				centerY + height * 0.1,
-				width * layer.scale,
-				height * layer.scale * 0.6,
-				0,
-				0,
-				Math.PI * 2
-			);
-			
-			// Neon gradient: cyan to blue
-			const gradient = ctx.createRadialGradient(
-				centerX, centerY - height * 0.2, 0,
-				centerX, centerY, Math.max(width, height) * layer.scale * 1.5
-			);
-			gradient.addColorStop(0, `rgba(0, 255, 255, 0)`);
-			gradient.addColorStop(0.3, `rgba(0, 200, 255, ${layer.alpha * fadeAlpha})`);
-			gradient.addColorStop(0.6, `rgba(100, 150, 255, ${layer.alpha * 0.7 * fadeAlpha})`);
-			gradient.addColorStop(1, `rgba(150, 100, 255, 0)`);
-			
-			ctx.fillStyle = gradient;
-			ctx.fill();
-			ctx.restore();
-		}
+		// Primary aura - warm gold glow (zen candle)
+		const baseAlpha = 0.15 * fadeAlpha * auraIntensity;
+		
+		// Single soft radial gradient - clean and elegant
+		const gradient = ctx.createRadialGradient(
+			centerX, centerY - height * 0.1, 0,
+			centerX, centerY, Math.max(width, height) * 1.2
+		);
+		gradient.addColorStop(0, `rgba(201, 184, 150, ${baseAlpha * 1.5})`); // zen-gold center
+		gradient.addColorStop(0.3, `rgba(201, 184, 150, ${baseAlpha})`);
+		gradient.addColorStop(0.6, `rgba(180, 160, 130, ${baseAlpha * 0.5})`);
+		gradient.addColorStop(1, 'rgba(180, 160, 130, 0)');
 
-		// Draw inner neon ring - cyan glow
 		ctx.save();
 		ctx.beginPath();
 		ctx.ellipse(
 			centerX,
 			centerY + height * 0.1,
-			width * 1.3,
-			height * 0.75,
-			0,
-			0,
-			Math.PI * 2
+			width * 1.4 + breathePhase * 10,
+			height * 0.8 + breathePhase * 6,
+			0, 0, Math.PI * 2
 		);
-		ctx.strokeStyle = `rgba(0, 255, 255, ${0.6 * fadeAlpha})`;
-		ctx.lineWidth = 2;
-		ctx.shadowColor = '#00FFFF';
-		ctx.shadowBlur = 20;
-		ctx.stroke();
+		ctx.fillStyle = gradient;
+		ctx.fill();
 		ctx.restore();
 
-		// Draw outer ring - purple accent
-		ctx.save();
-		ctx.beginPath();
-		ctx.ellipse(
-			centerX,
-			centerY + height * 0.1,
-			width * 1.5,
-			height * 0.85,
-			0,
-			0,
-			Math.PI * 2
-		);
-		ctx.strokeStyle = `rgba(180, 100, 255, ${0.4 * fadeAlpha})`;
-		ctx.lineWidth = 1.5;
-		ctx.shadowColor = '#B464FF';
-		ctx.shadowBlur = 15;
-		ctx.stroke();
-		ctx.restore();
-
-		// Add floating neon particles - giảm khi tracking yếu
-		if (Math.random() > 0.6 && fadeAlpha > 0.3) {
+		// Subtle incense smoke wisps - very light
+		if (Math.random() > 0.95 && fadeAlpha > 0.5) {
 			const angle = Math.random() * Math.PI * 2;
-			const radius = width * (0.7 + Math.random() * 0.5);
+			const radius = width * 0.5;
 			auraParticles.push({
 				x: centerX + Math.cos(angle) * radius,
-				y: centerY + Math.sin(angle) * radius * 0.7,
-				vx: (Math.random() - 0.5) * 0.8,
-				vy: -Math.random() * 1.5 - 0.8,
-				life: Math.floor(50 * fadeAlpha),
-				maxLife: Math.floor(50 * fadeAlpha),
-				size: Math.random() * 3 + 2
+				y: centerY + Math.sin(angle) * radius * 0.6,
+				vx: (Math.random() - 0.5) * 0.3,
+				vy: -Math.random() * 0.8 - 0.3,
+				life: 40,
+				maxLife: 40,
+				size: Math.random() * 2 + 1,
+				opacity: 0.3 * fadeAlpha
 			});
 		}
 	}
 
-	function drawAuraBurst(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, width: number, height: number) {
-		// Create massive full-screen burst with neon colors
-		const burstPhase = Math.min((Date.now() % 1500) / 1500, 1);
+	function drawZenBurst(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, width: number, height: number) {
+		// Elegant burst phase - angel wings divine light effect
+		const burstDuration = 3000; // 3 seconds for majestic angel effect
+		const burstPhase = (Date.now() % burstDuration) / burstDuration;
 		
-		// Layer 1: Giant cyan flash
-		ctx.save();
-		const flashSize1 = burstPhase * Math.max(ctx.canvas.width, ctx.canvas.height);
-		const gradient1 = ctx.createRadialGradient(
+		// Smooth easing - ease-out-cubic for majestic feel
+		const easeOut = 1 - Math.pow(1 - burstPhase, 3);
+		const alpha = Math.max(0, 1 - Math.pow(burstPhase, 0.5));
+
+		// ========== LAYER 0: Divine Angel Wings (Behind Person) ==========
+		if (burstPhase < 0.7) {
+			const wingPhase = Math.min(1, burstPhase * 1.5);
+			const wingAlpha = alpha * 0.7 * wingPhase;
+			
+			// Wing spread animation
+			const wingSpread = wingPhase * width * 2.5;
+			const wingHeight = wingPhase * height * 1.8;
+			
+			// Left Wing
+			ctx.save();
+			const leftWingGradient = ctx.createRadialGradient(
+				centerX - wingSpread * 0.3, centerY - height * 0.3, 0,
+				centerX - wingSpread, centerY - height * 0.5, wingSpread * 0.8
+			);
+			leftWingGradient.addColorStop(0, `rgba(255, 250, 240, ${wingAlpha})`);
+			leftWingGradient.addColorStop(0.3, `rgba(255, 245, 220, ${wingAlpha * 0.8})`);
+			leftWingGradient.addColorStop(0.6, `rgba(255, 235, 200, ${wingAlpha * 0.4})`);
+			leftWingGradient.addColorStop(1, 'rgba(255, 225, 180, 0)');
+			
+			// Draw left wing feather shapes
+			ctx.beginPath();
+			ctx.moveTo(centerX, centerY - height * 0.2);
+			// Feather layers going outward
+			for (let i = 0; i < 5; i++) {
+				const featherProgress = i / 5;
+				const featherWidth = wingSpread * (0.3 + featherProgress * 0.7);
+				const featherHeight = wingHeight * (0.5 + featherProgress * 0.5);
+				const curveX = centerX - featherWidth;
+				const curveY = centerY - height * 0.2 - featherHeight + Math.sin(featherProgress * Math.PI) * featherHeight * 0.5;
+				ctx.quadraticCurveTo(
+					centerX - featherWidth * 0.7, curveY + featherHeight * 0.3,
+					curveX, curveY
+				);
+			}
+			ctx.closePath();
+			ctx.fillStyle = leftWingGradient;
+			ctx.fill();
+			ctx.restore();
+			
+			// Right Wing
+			ctx.save();
+			const rightWingGradient = ctx.createRadialGradient(
+				centerX + wingSpread * 0.3, centerY - height * 0.3, 0,
+				centerX + wingSpread, centerY - height * 0.5, wingSpread * 0.8
+			);
+			rightWingGradient.addColorStop(0, `rgba(255, 250, 240, ${wingAlpha})`);
+			rightWingGradient.addColorStop(0.3, `rgba(255, 245, 220, ${wingAlpha * 0.8})`);
+			rightWingGradient.addColorStop(0.6, `rgba(255, 235, 200, ${wingAlpha * 0.4})`);
+			rightWingGradient.addColorStop(1, 'rgba(255, 225, 180, 0)');
+			
+			ctx.beginPath();
+			ctx.moveTo(centerX, centerY - height * 0.2);
+			for (let i = 0; i < 5; i++) {
+				const featherProgress = i / 5;
+				const featherWidth = wingSpread * (0.3 + featherProgress * 0.7);
+				const featherHeight = wingHeight * (0.5 + featherProgress * 0.5);
+				const curveX = centerX + featherWidth;
+				const curveY = centerY - height * 0.2 - featherHeight + Math.sin(featherProgress * Math.PI) * featherHeight * 0.5;
+				ctx.quadraticCurveTo(
+					centerX + featherWidth * 0.7, curveY + featherHeight * 0.3,
+					curveX, curveY
+				);
+			}
+			ctx.closePath();
+			ctx.fillStyle = rightWingGradient;
+			ctx.fill();
+			ctx.restore();
+			
+			// Halo Ring above head
+			if (wingPhase > 0.3) {
+				const haloAlpha = wingAlpha * 0.6 * Math.min(1, (wingPhase - 0.3) / 0.4);
+				const haloRadius = width * 0.8 * wingPhase;
+				
+				ctx.save();
+				ctx.beginPath();
+				ctx.ellipse(
+					centerX,
+					centerY - height * 0.7,
+					haloRadius,
+					haloRadius * 0.3,
+					0, 0, Math.PI * 2
+				);
+				ctx.strokeStyle = `rgba(255, 250, 230, ${haloAlpha})`;
+				ctx.lineWidth = 3 * wingPhase;
+				ctx.shadowColor = 'rgba(255, 250, 230, 0.8)';
+				ctx.shadowBlur = 20;
+				ctx.stroke();
+				
+				// Inner halo glow
+				const haloGlow = ctx.createRadialGradient(
+					centerX, centerY - height * 0.7, haloRadius * 0.5,
+					centerX, centerY - height * 0.7, haloRadius * 1.5
+				);
+				haloGlow.addColorStop(0, `rgba(255, 255, 240, ${haloAlpha * 0.3})`);
+				haloGlow.addColorStop(1, 'rgba(255, 250, 230, 0)');
+				ctx.fillStyle = haloGlow;
+				ctx.fill();
+				ctx.restore();
+			}
+		}
+
+		// ========== LAYER 1: Soft golden radiance (like candlelight expanding) ==========
+		const radianceSize = width * 3 * easeOut;
+		const radianceGradient = ctx.createRadialGradient(
 			centerX, centerY, 0,
-			centerX, centerY, flashSize1
+			centerX, centerY, radianceSize
 		);
-		gradient1.addColorStop(0, `rgba(0, 255, 255, ${(1 - burstPhase) * 0.8})`);
-		gradient1.addColorStop(0.3, `rgba(100, 200, 255, ${(1 - burstPhase) * 0.5})`);
-		gradient1.addColorStop(0.6, `rgba(150, 100, 255, ${(1 - burstPhase) * 0.3})`);
-		gradient1.addColorStop(1, 'rgba(150, 100, 255, 0)');
-		
-		ctx.fillStyle = gradient1;
+		radianceGradient.addColorStop(0, `rgba(201, 184, 150, ${alpha * 0.4})`);
+		radianceGradient.addColorStop(0.4, `rgba(201, 184, 150, ${alpha * 0.15})`);
+		radianceGradient.addColorStop(1, 'rgba(201, 184, 150, 0)');
+
+		ctx.save();
+		ctx.fillStyle = radianceGradient;
 		ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		ctx.restore();
 
-		// Layer 2: Expanding rings
-		for (let i = 0; i < 5; i++) {
-			const ringPhase = Math.max(0, burstPhase - i * 0.12);
-			const scale = 1 + ringPhase * 4;
-			const alpha = (1 - ringPhase) * 0.7;
+		// ========== LAYER 2: Gentle expanding rings (like water ripples) ==========
+		for (let i = 0; i < 3; i++) {
+			const ringDelay = i * 0.15;
+			const ringPhase = Math.max(0, Math.min(1, (burstPhase - ringDelay) / 0.5));
+			const ringEase = 1 - Math.pow(1 - ringPhase, 2);
+			
+			const ringScale = 1 + ringEase * 3;
+			const ringAlpha = (1 - ringPhase) * 0.4;
 
 			ctx.save();
 			ctx.beginPath();
 			ctx.ellipse(
 				centerX,
 				centerY + height * 0.1,
-				width * scale,
-				height * scale * 0.6,
-				0,
-				0,
-				Math.PI * 2
+				width * ringScale,
+				height * ringScale * 0.6,
+				0, 0, Math.PI * 2
 			);
-			
-			// Alternate cyan and purple rings
-			const ringColor = i % 2 === 0 ? `rgba(0, 255, 255, ${alpha})` : `rgba(180, 100, 255, ${alpha})`;
-			ctx.strokeStyle = ringColor;
-			ctx.lineWidth = 4 * (1 - ringPhase * 0.5);
-			ctx.shadowColor = i % 2 === 0 ? '#00FFFF' : '#B464FF';
-			ctx.shadowBlur = 30;
+			ctx.strokeStyle = `rgba(201, 184, 150, ${ringAlpha})`;
+			ctx.lineWidth = 2 * (1 - ringPhase * 0.5);
 			ctx.stroke();
 			ctx.restore();
 		}
 
-		// Layer 3: Massive particle explosion
-		if (burstPhase < 0.7) {
-			const particleCount = 30;
-			for (let i = 0; i < particleCount; i++) {
-				const angle = (i / particleCount) * Math.PI * 2;
-				const speed = 5 + Math.random() * 8;
-				const dist = burstPhase * Math.max(ctx.canvas.width, ctx.canvas.height) * 0.6;
+		// ========== LAYER 3: Floating light orbs (sparse, elegant) ==========
+		if (burstPhase < 0.6 && burstPhase > 0.1) {
+			const orbCount = 8;
+			for (let i = 0; i < orbCount; i++) {
+				const angle = (i / orbCount) * Math.PI * 2 + burstPhase * 0.5;
+				const distance = easeOut * Math.min(ctx.canvas.width, ctx.canvas.height) * 0.35;
+				const orbX = centerX + Math.cos(angle) * distance;
+				const orbY = centerY + Math.sin(angle) * distance * 0.6 - easeOut * 30;
 				
-				auraParticles.push({
-					x: centerX + Math.cos(angle) * dist,
-					y: centerY + Math.sin(angle) * dist * 0.6,
-					vx: Math.cos(angle) * speed * 0.5,
-					vy: Math.sin(angle) * speed * 0.3,
-					life: 60,
-					maxLife: 60,
-					size: Math.random() * 6 + 4
-				});
+				const orbGradient = ctx.createRadialGradient(orbX, orbY, 0, orbX, orbY, 8);
+				orbGradient.addColorStop(0, `rgba(255, 248, 235, ${alpha * 0.8})`);
+				orbGradient.addColorStop(0.5, `rgba(201, 184, 150, ${alpha * 0.4})`);
+				orbGradient.addColorStop(1, 'rgba(201, 184, 150, 0)');
+
+				ctx.save();
+				ctx.beginPath();
+				ctx.arc(orbX, orbY, 8, 0, Math.PI * 2);
+				ctx.fillStyle = orbGradient;
+				ctx.fill();
+				ctx.restore();
 			}
 		}
+
+		// ========== LAYER 4: Central lotus glow bloom ==========
+		const bloomSize = width * 2 * easeOut;
+		const bloomGradient = ctx.createRadialGradient(
+			centerX, centerY, 0,
+			centerX, centerY, bloomSize
+		);
+		bloomGradient.addColorStop(0, `rgba(255, 248, 235, ${alpha * 0.6})`);
+		bloomGradient.addColorStop(0.3, `rgba(201, 184, 150, ${alpha * 0.3})`);
+		bloomGradient.addColorStop(1, 'rgba(201, 184, 150, 0)');
+
+		ctx.save();
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, bloomSize, 0, Math.PI * 2);
+		ctx.fillStyle = bloomGradient;
+		ctx.fill();
+		ctx.restore();
 	}
 
-	function drawParticles(ctx: CanvasRenderingContext2D) {
+	function drawZenParticles(ctx: CanvasRenderingContext2D) {
+		// Zen particles - soft, floating light orbs
 		for (let i = auraParticles.length - 1; i >= 0; i--) {
 			const p = auraParticles[i];
 			
@@ -489,17 +562,17 @@
 				continue;
 			}
 
-			const alpha = p.life / p.maxLife;
-			
-			// Alternate cyan and purple particles
-			const hue = Math.random() > 0.5 ? 180 : 280; // Cyan or Purple
+			const alpha = (p.life / p.maxLife) * p.opacity;
 			
 			ctx.save();
+			const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2);
+			gradient.addColorStop(0, `rgba(255, 248, 235, ${alpha})`);
+			gradient.addColorStop(0.5, `rgba(201, 184, 150, ${alpha * 0.5})`);
+			gradient.addColorStop(1, 'rgba(201, 184, 150, 0)');
+			
 			ctx.beginPath();
-			ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-			ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${alpha * 0.9})`;
-			ctx.shadowColor = hue === 180 ? '#00FFFF' : '#B464FF';
-			ctx.shadowBlur = 15;
+			ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+			ctx.fillStyle = gradient;
 			ctx.fill();
 			ctx.restore();
 		}
@@ -607,28 +680,28 @@
 
 		showAuraFlash = true;
 		
-		// Spawn massive burst particles
+		// Spawn zen light orbs - sparse, elegant
 		const centerX = bodyCenterX * auraCanvas.width;
 		const centerY = bodyCenterY * auraCanvas.height;
-		const maxDist = Math.max(auraCanvas.width, auraCanvas.height) * 0.4;
 		
-		for (let i = 0; i < 40; i++) {
-			const angle = Math.random() * Math.PI * 2;
-			const speed = 3 + Math.random() * 6;
+		for (let i = 0; i < 12; i++) {
+			const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.3;
+			const speed = 0.5 + Math.random() * 1;
 			auraParticles.push({
 				x: centerX,
 				y: centerY,
 				vx: Math.cos(angle) * speed,
-				vy: Math.sin(angle) * speed * 0.6,
-				life: 80 + Math.random() * 40,
-				maxLife: 120,
-				size: Math.random() * 6 + 3
+				vy: Math.sin(angle) * speed * 0.6 - 0.3,
+				life: 60 + Math.random() * 30,
+				maxLife: 90,
+				size: 2 + Math.random() * 2,
+				opacity: 0.5 + Math.random() * 0.3
 			});
 		}
 
 		setTimeout(() => {
 			showAuraFlash = false;
-		}, 2000);
+		}, 2500);
 
 		saveMerit();
 		totalMerits++;
@@ -764,15 +837,20 @@
 	<header class="relative z-30 px-4 pt-6 pb-4 flex items-center justify-between">
 		<button 
 			onclick={() => goto('/dashboard')}
-			class="p-2 rounded-full bg-white/10 backdrop-blur-md"
+			class="p-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors"
 		>
-			<ArrowLeft class="w-5 h-5 text-white" />
+			<svg class="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+				<path d="M19 12H5M12 19l-7-7 7-7"/>
+			</svg>
 		</button>
 		
-		<h1 class="font-serif text-lg font-semibold text-white tracking-wide">Tích công đức</h1>
+		<h1 class="font-serif text-lg font-light text-white tracking-wide">Tích công đức</h1>
 		
-		<button class="p-2 rounded-full bg-white/10 backdrop-blur-md">
-			<Settings class="w-5 h-5 text-white" />
+		<button class="p-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors">
+			<svg class="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+				<circle cx="12" cy="12" r="3"/>
+				<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+			</svg>
 		</button>
 	</header>
 
@@ -780,36 +858,52 @@
 	{#if cameraActive && !cameraError}
 		<div class="absolute top-24 left-6 z-30">
 			<div class="relative w-20 h-20">
-				<!-- Background circle -->
+				<!-- Zen circle - ink brush style -->
 				<svg class="w-full h-full -rotate-90" viewBox="0 0 80 80">
+					<!-- Outer soft glow -->
+					<defs>
+						<filter id="zenGlow" x="-50%" y="-50%" width="200%" height="200%">
+							<feGaussianBlur stdDeviation="3" result="blur"/>
+							<feMerge>
+								<feMergeNode in="blur"/>
+								<feMergeNode in="SourceGraphic"/>
+							</feMerge>
+						</filter>
+					</defs>
+					
+					<!-- Background circle - subtle ink wash -->
 					<circle
 						cx="40"
 						cy="40"
 						r="35"
 						fill="none"
-						stroke="rgba(255,255,255,0.15)"
-						stroke-width="3"
+						stroke="rgba(201, 184, 150, 0.15)"
+						stroke-width="2"
 					/>
+					
+					<!-- Progress circle - warm gold -->
 					<circle
 						cx="40"
 						cy="40"
 						r="35"
 						fill="none"
-						stroke={isPraying ? '#FFD700' : 'rgba(255,255,255,0.5)'}
-						stroke-width="3"
+						stroke={isPraying ? '#C9B896' : 'rgba(201, 184, 150, 0.5)'}
+						stroke-width="2"
 						stroke-linecap="round"
 						stroke-dasharray="219.91"
 						stroke-dashoffset={219.91 - (prayerProgress / PRAYING_TIME) * 219.91}
-						class="transition-all duration-100"
+						filter="url(#zenGlow)"
+						class="transition-all duration-300"
 					/>
 				</svg>
 				
+				<!-- Center content -->
 				<div class="absolute inset-0 flex flex-col items-center justify-center">
-					<span class="text-2xl font-bold text-white">
+					<span class="font-serif text-2xl font-light text-white tracking-wide">
 						{Math.ceil(PRAYING_TIME - prayerProgress)}
 					</span>
 					{#if !isPraying}
-						<span class="text-[10px] text-white/50 -mt-1">giây</span>
+						<span class="text-[10px] text-white/40 tracking-widest -mt-0.5">giây</span>
 					{/if}
 				</div>
 			</div>
@@ -818,37 +912,43 @@
 
 	<!-- Loading State -->
 	{#if isLoading && !cameraError}
-		<div class="absolute inset-0 flex items-center justify-center z-20 bg-black/60">
+		<div class="absolute inset-0 flex items-center justify-center z-20 bg-black/60 backdrop-blur-sm">
 			<div class="text-center">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-					<Camera class="w-8 h-8 text-white/60 animate-pulse" />
+				<!-- Zen breathing lotus -->
+				<div class="relative w-16 h-16 mx-auto mb-4">
+					<div class="absolute inset-0 rounded-full border border-zen-gold/20 animate-ping" style="animation-duration: 3s;"></div>
+					<div class="absolute inset-2 rounded-full border border-zen-gold/30 animate-pulse" style="animation-duration: 2s;"></div>
+					<div class="absolute inset-4 rounded-full bg-zen-gold/20 animate-breathe-subtle"></div>
 				</div>
-				<p class="text-white/60 text-sm">Đang khởi động...</p>
+				<p class="text-zen-gold/60 text-sm tracking-wide">Đang tĩnh tâm...</p>
 			</div>
 		</div>
 	{/if}
 
 	<!-- Error State -->
 	{#if cameraError}
-		<div class="absolute inset-0 flex items-center justify-center z-20 bg-black/80 px-6">
-			<div class="text-center">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
-					<CameraOff class="w-8 h-8 text-red-400" />
+		<div class="absolute inset-0 flex items-center justify-center z-20 bg-black/80 backdrop-blur-md px-6">
+			<div class="text-center max-w-xs">
+				<!-- Zen error icon -->
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full border border-zen-gold/20 flex items-center justify-center">
+					<svg class="w-8 h-8 text-zen-gold/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<circle cx="12" cy="12" r="10"/>
+						<path d="M12 8v4M12 16h.01"/>
+					</svg>
 				</div>
-				<p class="text-red-300 mb-2 flex items-center justify-center gap-2 text-sm">
-					<AlertCircle class="w-4 h-4" />
+				<p class="text-white/80 mb-6 text-sm leading-relaxed">
 					{cameraError}
 				</p>
-				<div class="flex gap-3 justify-center mt-6">
+				<div class="flex flex-col gap-3">
 					<button
 						onclick={() => { cameraError = null; startCamera(); }}
-						class="px-5 py-2.5 bg-yellow-500 text-black rounded-full text-sm font-medium"
+						class="w-full py-3 bg-zen-gold/20 text-zen-gold rounded-full text-sm font-medium tracking-wide hover:bg-zen-gold/30 transition-colors"
 					>
 						Thử lại
 					</button>
 					<button
 						onclick={() => goto('/setup-profile')}
-						class="px-5 py-2.5 bg-white/10 text-white rounded-full text-sm font-medium"
+						class="w-full py-3 bg-white/5 text-white/60 rounded-full text-sm tracking-wide hover:bg-white/10 transition-colors"
 					>
 						Dùng thử
 					</button>
@@ -861,31 +961,41 @@
 	{#if cameraActive && !cameraError}
 		<div class="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-8 px-6">
 			<div class="flex flex-col items-center gap-3">
-				<!-- Meditation Icon -->
-				<div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
-					<svg class="w-7 h-7 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<ellipse cx="24" cy="42" rx="5" ry="2.5"/>
-						<path d="M24 38 C24 38 19 32 19 26 C19 20 24 14 24 14 C24 14 29 20 29 26 C29 32 24 38 24 38"/>
-						<path d="M19 34 C15 28 12 24 12 20 C12 16 17 14 21 16"/>
-						<path d="M29 34 C33 28 36 24 36 20 C36 16 31 14 27 16"/>
+				<!-- Zen Lotus Meditation Icon -->
+				<div class="relative w-14 h-14 flex items-center justify-center">
+					<!-- Subtle outer glow -->
+					<div class="absolute inset-0 rounded-full bg-zen-gold/10 animate-pulse" style="animation-duration: 4s;"></div>
+					<!-- Lotus SVG -->
+					<svg class="w-8 h-8 text-zen-gold" viewBox="0 0 48 48" fill="none">
+						<defs>
+							<linearGradient id="lotusGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+								<stop offset="0%" stop-color="#C9B896" stop-opacity="0.6"/>
+								<stop offset="100%" stop-color="#E8DCC8" stop-opacity="0.9"/>
+							</linearGradient>
+						</defs>
+						<!-- Center petal -->
+						<ellipse cx="24" cy="24" rx="4" ry="8" fill="url(#lotusGrad)"/>
+						<!-- Side petals -->
+						<path d="M24 26 C20 20 16 18 14 14 C14 14 20 14 24 22" fill="url(#lotusGrad)" opacity="0.7"/>
+						<path d="M24 26 C28 20 32 18 34 14 C34 14 28 14 24 22" fill="url(#lotusGrad)" opacity="0.7"/>
+						<!-- Outer petals -->
+						<path d="M24 28 C18 22 12 20 10 16 C10 16 18 16 24 26" fill="url(#lotusGrad)" opacity="0.5"/>
+						<path d="M24 28 C30 22 36 20 38 16 C38 16 30 16 24 26" fill="url(#lotusGrad)" opacity="0.5"/>
 					</svg>
 				</div>
 				
 				<!-- Instruction -->
-				<p class="text-white text-center font-medium">
+				<p class="text-white/80 text-center font-light tracking-wide">
 					{statusText()}
 				</p>
 				
-				<!-- Prayer Quality Bar -->
+				<!-- Prayer Quality Bar - Zen Style -->
 				{#if !isPraying && trackingConfidence > 30}
-					<div class="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+					<div class="w-44 h-1 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
 						<div 
-							class="h-full rounded-full transition-all duration-300"
-							class:bg-green-400={prayerQuality >= 80}
-							class:bg-yellow-400={prayerQuality >= 50 && prayerQuality < 80}
-							class:bg-orange-400={prayerQuality >= 30 && prayerQuality < 50}
-							class:bg-red-400={prayerQuality < 30}
-							style="width: {prayerQuality}%"
+							class="h-full rounded-full transition-all duration-500 ease-out"
+							style="background: linear-gradient(90deg, #9CAF88, #C9B896);"
+							style:width="{prayerQuality}%"
 						></div>
 					</div>
 				{/if}

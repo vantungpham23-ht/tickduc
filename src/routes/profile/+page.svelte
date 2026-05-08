@@ -89,7 +89,7 @@
 	});
 </script>
 
-<div class="min-h-screen bg-zen-beige pb-24">
+<div class="min-h-screen bg-zen-cream pb-24">
 	<!-- Header -->
 	<header class="px-6 py-6">
 		<div class="flex items-center justify-between">
@@ -106,7 +106,7 @@
 	<!-- Main Content -->
 	<main class="px-6">
 		<!-- Profile Card -->
-		<div class="bg-zen-white rounded-3xl p-8 shadow-sm text-center mb-6">
+		<div class="bg-zen-parchment rounded-3xl p-8 shadow-sm text-center mb-6">
 			<!-- Avatar with SVG -->
 			<div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-zen-gold to-zen-brown flex items-center justify-center mb-4 shadow-lg shadow-zen-gold/20">
 				{#if avatarEmoji === 'lotus' || avatarEmoji === ''}
@@ -171,7 +171,7 @@
 		</div>
 
 		<!-- Change Avatar -->
-		<div class="bg-zen-white rounded-3xl p-6 shadow-sm">
+		<div class="bg-zen-parchment rounded-3xl p-6 shadow-sm">
 			<h3 class="font-serif text-lg font-semibold text-zen-brown mb-4 text-center">
 				Đổi Avatar
 			</h3>
@@ -180,7 +180,7 @@
 				{#each avatarOptions as option}
 					<button
 						onclick={() => updateAvatar(option.id)}
-						class="w-full aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-200 {avatarEmoji === option.id ? 'bg-zen-gold text-white' : 'bg-zen-beige hover:bg-zen-brown/10'}"
+						class="w-full aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-200 {avatarEmoji === option.id ? 'bg-zen-gold text-zen-cream' : 'bg-zen-linen hover:bg-zen-brown/10'}"
 					>
 						{#if option.id === 'lotus'}
 							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">

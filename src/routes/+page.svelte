@@ -3,7 +3,7 @@
 	import { Leaf } from 'lucide-svelte';
 </script>
 
-<div class="min-h-screen bg-zen-beige flex flex-col items-center justify-center px-6 py-12">
+<div class="min-h-screen bg-zen-cream flex flex-col items-center justify-center px-6 py-12">
 	<!-- Background decoration -->
 	<div class="fixed inset-0 overflow-hidden pointer-events-none">
 		<div class="absolute top-20 left-10 w-32 h-32 bg-zen-gold/5 rounded-full blur-3xl"></div>
@@ -32,7 +32,7 @@
 		<!-- Start Button -->
 		<button
 			onclick={() => goto('/auth')}
-			class="group relative px-12 py-4 bg-zen-brown text-zen-white rounded-full font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 hover:-translate-y-0.5 active:translate-y-0"
+			class="group relative px-12 py-4 bg-zen-brown text-zen-cream rounded-full font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-zen-gold focus-visible:ring-offset-2"
 		>
 			<span class="relative z-10">Bắt đầu</span>
 			<div class="absolute inset-0 rounded-full bg-zen-gold/20 scale-0 group-hover:scale-100 transition-transform duration-300"></div>

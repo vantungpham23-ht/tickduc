@@ -70,7 +70,7 @@
 	}
 </script>
 
-<div class="min-h-screen bg-zen-beige pb-24">
+<div class="min-h-screen bg-zen-cream pb-24">
 	<!-- Header -->
 	<header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
 		<div class="px-6 py-4 flex items-center gap-3">
@@ -203,7 +203,7 @@
 							type={showCurrentPassword ? 'text' : 'password'}
 							bind:value={currentPassword}
 							placeholder="Nhập mật khẩu hiện tại"
-							class="w-full px-4 py-3 rounded-xl border border-zen-brown/20 bg-zen-beige/30 focus:outline-none focus:ring-2 focus:ring-zen-gold/50 focus:border-zen-gold transition-all text-zen-brown placeholder:text-zen-brown/30"
+							class="w-full px-4 py-3 rounded-xl border border-zen-brown/20 bg-zen-linen/50 focus:outline-none focus:ring-2 focus:ring-zen-gold/50 focus:border-zen-gold transition-all text-zen-brown placeholder:text-zen-brown/30"
 						/>
 						<button
 							type="button"
@@ -227,7 +227,7 @@
 							type={showNewPassword ? 'text' : 'password'}
 							bind:value={newPassword}
 							placeholder="Ít nhất 6 ký tự"
-							class="w-full px-4 py-3 rounded-xl border border-zen-brown/20 bg-zen-beige/30 focus:outline-none focus:ring-2 focus:ring-zen-gold/50 focus:border-zen-gold transition-all text-zen-brown placeholder:text-zen-brown/30"
+							class="w-full px-4 py-3 rounded-xl border border-zen-brown/20 bg-zen-linen/50 focus:outline-none focus:ring-2 focus:ring-zen-gold/50 focus:border-zen-gold transition-all text-zen-brown placeholder:text-zen-brown/30"
 						/>
 						<button
 							type="button"
@@ -251,7 +251,7 @@
 							type={showConfirmPassword ? 'text' : 'password'}
 							bind:value={confirmPassword}
 							placeholder="Nhập lại mật khẩu mới"
-							class="w-full px-4 py-3 rounded-xl border border-zen-brown/20 bg-zen-beige/30 focus:outline-none focus:ring-2 focus:ring-zen-gold/50 focus:border-zen-gold transition-all text-zen-brown placeholder:text-zen-brown/30"
+							class="w-full px-4 py-3 rounded-xl border border-zen-brown/20 bg-zen-linen/50 focus:outline-none focus:ring-2 focus:ring-zen-gold/50 focus:border-zen-gold transition-all text-zen-brown placeholder:text-zen-brown/30"
 						/>
 						<button
 							type="button"

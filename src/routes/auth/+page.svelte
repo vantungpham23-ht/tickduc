@@ -119,11 +119,11 @@
 	});
 </script>
 
-<div class="min-h-screen bg-zen-beige flex flex-col relative">
+<div class="min-h-screen bg-zen-cream flex flex-col relative">
 	<!-- Guest Toast Notification -->
 	{#if showGuestToast}
 		<div class="fixed top-6 left-1/2 -translate-x-1/2 right-6 z-50 animate-fadeInUp">
-			<div class="bg-zen-brown text-zen-beige rounded-2xl px-5 py-4 shadow-xl max-w-md mx-auto">
+			<div class="bg-zen-brown text-zen-cream rounded-2xl px-5 py-4 shadow-xl max-w-md mx-auto">
 				<div class="flex items-start gap-3">
 					<svg class="w-6 h-6 text-zen-gold flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="10"/>
@@ -165,7 +165,7 @@
 						type="email"
 						placeholder="Email"
 						bind:value={email}
-						class="w-full px-4 py-4 pl-12 bg-zen-white border border-zen-brown/10 rounded-2xl text-zen-brown placeholder:text-zen-brown/40 focus:outline-none focus:border-zen-gold focus:ring-2 focus:ring-zen-gold/20 transition-all"
+						class="w-full px-4 py-4 pl-12 bg-zen-cream border border-zen-brown/10 rounded-2xl text-zen-brown placeholder:text-zen-brown/40 focus:outline-none focus:border-zen-gold focus:ring-2 focus:ring-zen-gold/20 transition-all focus-visible:ring-2 focus-visible:ring-zen-gold/30 focus-visible:ring-offset-2"
 					/>
 					<Mail class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zen-brown/30" />
 				</div>
@@ -176,7 +176,7 @@
 						type={showPassword ? 'text' : 'password'}
 						placeholder="Mật khẩu"
 						bind:value={password}
-						class="w-full px-4 py-4 pl-12 pr-12 bg-zen-white border border-zen-brown/10 rounded-2xl text-zen-brown placeholder:text-zen-brown/40 focus:outline-none focus:border-zen-gold focus:ring-2 focus:ring-zen-gold/20 transition-all"
+						class="w-full px-4 py-4 pl-12 pr-12 bg-zen-cream border border-zen-brown/10 rounded-2xl text-zen-brown placeholder:text-zen-brown/40 focus:outline-none focus:border-zen-gold focus:ring-2 focus:ring-zen-gold/20 transition-all focus-visible:ring-2 focus-visible:ring-zen-gold/30 focus-visible:ring-offset-2"
 					/>
 					<Lock class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zen-brown/30" />
 					<button
@@ -210,7 +210,7 @@
 				<button
 					type="submit"
 					disabled={isLoading}
-					class="w-full py-4 bg-zen-brown text-zen-white rounded-2xl font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+					class="w-full py-4 bg-zen-brown text-zen-cream rounded-2xl font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 				>
 					{#if isLoading}
 						<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
