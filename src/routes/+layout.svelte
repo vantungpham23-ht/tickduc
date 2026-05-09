@@ -26,7 +26,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 </svelte:head>
 
-<div class="min-h-screen bg-[#F7F3F0]">
+<div class="min-h-screen bg-[#1A1814]">
 	{@render children()}
 </div>
 

@@ -478,7 +478,11 @@
 			</div>
 			{#if remainingTaps > 0 && remainingTaps < 108}
 				<p class="text-center text-[#3D3028]/40 text-xs mt-2 tracking-wide">
-					Còn {remainingTaps} cốc để được +1 công đức
+					Còn {remainingTaps} cốc để được +10 công đức
+				</p>
+			{:else if remainingTaps === 0}
+				<p class="text-center text-[#C5A059] text-xs mt-2 tracking-wide">
+					Hoàn thành 108 cốc - Được +10 công đức!
 				</p>
 			{/if}
 		</div>

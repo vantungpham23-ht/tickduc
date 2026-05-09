@@ -383,6 +383,7 @@
 		<!-- Instructions -->
 		<div class="text-center mt-4">
 			<p class="text-white/50 text-sm">Chắp 2 tay trước ngực trong {PRAYING_DURATION} giây</p>
+			<p class="text-white/30 text-xs mt-2">Hoàn thành 10 giây chắp tay để được +1 công đức</p>
 		</div>
 	</main>
 

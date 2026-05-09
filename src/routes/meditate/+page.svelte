@@ -22,6 +22,10 @@
 	let leftHandY = $state(0);
 	let rightHandY = $state(0);
 
+	// Stability tracking
+	let poseStartTime = 0;
+	const POSE_STABILITY_DELAY = 0; // Start immediately when both hands are in zone
+
 	// Wake Lock
 	let wakeLock: WakeLockSentinel | null = null;
 
@@ -222,6 +226,7 @@
 			handDetected = false;
 			leftHandY = 0;
 			rightHandY = 0;
+			poseStartTime = 0; // Reset stability timer
 			if (isInPose) exitMeditation();
 			return;
 		}
@@ -230,20 +235,44 @@
 
 		// Lấy vị trí Y của mỗi tay (wrist landmark = index 0)
 		// Tay ở dưới = Y lớn hơn (vì Y tăng từ trên xuống dưới)
+		let currentLeftY = 0;
+		let currentRightY = 0;
+
 		if (results.landmarks.length === 1) {
-			leftHandY = results.landmarks[0][0].y;
-			rightHandY = results.landmarks[0][0].y;
+			currentLeftY = results.landmarks[0][0].y;
+			currentRightY = results.landmarks[0][0].y;
 		} else if (results.landmarks.length >= 2) {
-			leftHandY = results.landmarks[0][0].y;
-			rightHandY = results.landmarks[1][0].y;
+			currentLeftY = results.landmarks[0][0].y;
+			currentRightY = results.landmarks[1][0].y;
 		}
 
-		// Kiểm tra nếu 2 tay đặt xuống dưới (đầu gối)
-		// Y > 0.5 nghĩa là tay ở dưới màn hình
-		const nowInPose = leftHandY > 0.4 && rightHandY > 0.4;
+		leftHandY = currentLeftY;
+		rightHandY = currentRightY;
 
-		if (nowInPose && !wasInPose) enterMeditation();
-		else if (!nowInPose && wasInPose) exitMeditation();
+		// Kiểm tra nếu 2 tay đặt xuống dưới (vùng đầu gối)
+		// Y > 0.5 nghĩa là tay ở dưới màn hình (đầu gối)
+		// Y > 0.35 đến Y < 0.75 là vùng hợp lý cho đầu gối
+		const leftInZone = currentLeftY > 0.5 && currentLeftY < 0.8;
+		const rightInZone = currentRightY > 0.5 && currentRightY < 0.8;
+		const nowInPose = leftInZone && rightInZone;
+
+		if (nowInPose && !wasInPose) {
+			// Bắt đầu đếm thời gian ổn định
+			if (poseStartTime === 0) {
+				poseStartTime = Date.now();
+			}
+			// Kiểm tra đã giữ ổn định đủ lâu chưa
+			if (Date.now() - poseStartTime >= POSE_STABILITY_DELAY) {
+				enterMeditation();
+			}
+		} else if (!nowInPose && wasInPose) {
+			// Tay di chuyển ra khỏi vùng
+			poseStartTime = 0;
+			exitMeditation();
+		} else if (!nowInPose) {
+			// Không ở trong tư thế, reset timer
+			poseStartTime = 0;
+		}
 		wasInPose = nowInPose;
 	}
 
@@ -395,6 +424,58 @@
 		
 		<!-- Overlay gradient -->
 		<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-20 pointer-events-none"></div>
+
+		<!-- Hand placement zones -->
+		{#if !isInPose}
+			<!-- Left hand zone -->
+			<div class="absolute z-25 bottom-[22%] left-[8%] w-24 h-24 flex flex-col items-center justify-center">
+				<div class="relative w-full h-full">
+					<div class="absolute inset-0 rounded-full border-2 border-dashed {leftHandY > 0.5 && leftHandY < 0.8 ? 'border-green-400/70 bg-green-400/20' : 'border-white/40 bg-white/5'}" 
+						style="animation: pulse-zone 2s ease-in-out infinite;">
+					</div>
+					<div class="absolute inset-0 flex items-center justify-center">
+						{#if leftHandY > 0.5 && leftHandY < 0.8}
+							<svg class="w-12 h-12 text-green-400/80" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+							</svg>
+						{:else}
+							<svg class="w-10 h-10 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v6M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/>
+								<path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+							</svg>
+						{/if}
+					</div>
+				</div>
+				<p class="text-white/50 text-xs mt-2 text-center">Tay trái</p>
+			</div>
+
+			<!-- Right hand zone -->
+			<div class="absolute z-25 bottom-[22%] right-[8%] w-24 h-24 flex flex-col items-center justify-center">
+				<div class="relative w-full h-full">
+					<div class="absolute inset-0 rounded-full border-2 border-dashed {rightHandY > 0.5 && rightHandY < 0.8 ? 'border-green-400/70 bg-green-400/20' : 'border-white/40 bg-white/5'}" 
+						style="animation: pulse-zone 2s ease-in-out infinite;">
+					</div>
+					<div class="absolute inset-0 flex items-center justify-center">
+						{#if rightHandY > 0.5 && rightHandY < 0.8}
+							<svg class="w-12 h-12 text-green-400/80" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+							</svg>
+						{:else}
+							<svg class="w-10 h-10 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v6M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/>
+								<path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+							</svg>
+						{/if}
+					</div>
+				</div>
+				<p class="text-white/50 text-xs mt-2 text-center">Tay phải</p>
+			</div>
+
+			<!-- Center line indicator -->
+			<div class="absolute z-25 bottom-[15%] left-1/2 -translate-x-1/2 text-center">
+				<p class="text-white/30 text-xs">Đặt 2 tay xuống 2 vùng trên</p>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Header -->
@@ -441,6 +522,7 @@
 		<!-- Instructions -->
 		<div class="text-center mt-4">
 			<p class="text-white/50 text-sm">Ngồi yên, 2 tay đặt lên 2 đầu gối trong 10 phút</p>
+			<p class="text-white/30 text-xs mt-2">Hoàn thành 10 phút thiền để được +100 công đức</p>
 		</div>
 	</main>
 
@@ -500,6 +582,10 @@
 			transform: translateY(110vh) rotate(360deg) translateX(50px);
 			opacity: 0;
 		}
+	}
+	@keyframes pulse-zone {
+		0%, 100% { opacity: 0.6; transform: scale(1); }
+		50% { opacity: 1; transform: scale(1.05); }
 	}
 	.font-serif { font-family: 'Playfair Display', Georgia, serif; }
 </style>
