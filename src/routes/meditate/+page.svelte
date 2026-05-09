@@ -22,6 +22,9 @@
 	let leftHandY = $state(0);
 	let rightHandY = $state(0);
 
+	// Wake Lock
+	let wakeLock: WakeLockSentinel | null = null;
+
 	// Audio
 	let audioContext: AudioContext | null = null;
 	let mediBuffer: AudioBuffer | null = null;
@@ -33,8 +36,8 @@
 	let toastTimeout: ReturnType<typeof setTimeout>;
 
 	// Constants
-	const MEDITATION_DURATION = 10 * 60;
-	const MEDITATION_THRESHOLD = 0.25; // Tỷ lệ tay so với body để xác định đặt lên đầu gối
+	const MEDITATION_DURATION = 600;
+	const MEDITATION_THRESHOLD = 0.25;
 
 	async function loadAudioFiles() {
 		try {
@@ -44,6 +47,25 @@
 			mediBuffer = await audioContext.decodeAudioData(mediData);
 		} catch (error) {
 			console.error('Error loading audio:', error);
+		}
+	}
+
+	async function requestWakeLock() {
+		try {
+			if ('wakeLock' in navigator) {
+				wakeLock = await navigator.wakeLock.request('screen');
+				console.log('Wake Lock acquired');
+			}
+		} catch (err) {
+			console.error('Wake Lock error:', err);
+		}
+	}
+
+	async function releaseWakeLock() {
+		if (wakeLock) {
+			await wakeLock.release();
+			wakeLock = null;
+			console.log('Wake Lock released');
 		}
 	}
 
@@ -139,7 +161,7 @@
 		if (!videoElement || !handLandmarker || !cameraActive) return;
 
 		const renderLoop = (timestamp: number) => {
-			if (lastTimestamp !== timestamp) {
+			if (lastTimestamp !== timestamp && videoElement && handLandmarker) {
 				const results = handLandmarker.detectForVideo(videoElement, timestamp);
 				lastTimestamp = timestamp;
 				drawHandLandmarks(results);
@@ -231,6 +253,7 @@
 		isInPose = true;
 		if (audioContext?.state === 'suspended') audioContext.resume();
 		startAudioLoop();
+		requestWakeLock();
 
 		if (!meditationInterval) {
 			meditationInterval = setInterval(() => {
@@ -243,6 +266,7 @@
 	function exitMeditation() {
 		isInPose = false;
 		stopAudioLoop();
+		releaseWakeLock();
 		if (meditationInterval) { clearInterval(meditationInterval); meditationInterval = null; }
 	}
 
@@ -260,15 +284,15 @@
 			const isGuest = localStorage.getItem('isGuest') === 'true';
 			if (isGuest) {
 				const current = parseInt(localStorage.getItem('guestMerit') || '0');
-				localStorage.setItem('guestMerit', String(current + 1));
+				localStorage.setItem('guestMerit', String(current + 100));
 				return;
 			}
 			const { data: { user } } = await supabase.auth.getUser();
 			if (!user) return;
 			await supabase.from('merit_logs').insert({
-				user_id: user.id, merits_earned: 1, merit_type: 'meditation', duration_seconds: MEDITATION_DURATION
+				user_id: user.id, merits_earned: 100, merit_type: 'meditation', duration_seconds: MEDITATION_DURATION
 			});
-			await supabase.rpc('add_merit', { p_user_id: user.id, p_merits: 1, p_duration: MEDITATION_DURATION });
+			await supabase.rpc('add_merit', { p_user_id: user.id, p_merits: 100, p_duration: MEDITATION_DURATION });
 		} catch (error) { console.error('Error saving merit:', error); }
 	}
 
@@ -306,6 +330,7 @@
 	onDestroy(() => {
 		if (animationFrameId) cancelAnimationFrame(animationFrameId);
 		stopCamera();
+		releaseWakeLock();
 		if (audioContext) audioContext.close();
 		clearTimeout(toastTimeout);
 		if (meditationInterval) clearInterval(meditationInterval);
@@ -415,7 +440,7 @@
 
 		<!-- Instructions -->
 		<div class="text-center mt-4">
-			<p class="text-white/50 text-sm">Ngồi yên, 2 tay đặt lên 2 đầu gối</p>
+			<p class="text-white/50 text-sm">Ngồi yên, 2 tay đặt lên 2 đầu gối trong 10 phút</p>
 		</div>
 	</main>
 
@@ -423,7 +448,7 @@
 	{#if showMeritToast}
 		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50" style="animation: fadeInUp 0.8s ease-out forwards;">
 			<div class="bg-white text-[#3D3028] px-10 py-6 rounded-2xl shadow-2xl text-center">
-				<p class="font-serif text-xl tracking-wide mb-2">+1 Công đức</p>
+				<p class="font-serif text-xl tracking-wide mb-2">+100 Công đức</p>
 				<p class="text-[#93B1A7] text-sm tracking-wider">Nam mô Quan Thế Âm</p>
 			</div>
 		</div>

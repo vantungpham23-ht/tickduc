@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
 
@@ -12,6 +11,7 @@
 	let successMessage = $state('');
 	let showGuestToast = $state(false);
 	let isSignUp = $state(false);
+	let mounted = $state(false);
 
 	function handleGuestLogin() {
 		showGuestToast = true;
@@ -20,7 +20,7 @@
 
 		setTimeout(() => {
 			goto('/setup-profile');
-		}, 3000);
+		}, 2500);
 	}
 
 	async function handleSubmit(e: Event) {
@@ -43,40 +43,29 @@
 
 		try {
 			if (isSignUp) {
-				// Sign up new user
-				console.log('🔄 Đang đăng ký với:', { email, passwordLength: password.length });
-				
 				const { data, error } = await supabase.auth.signUp({
 					email,
 					password,
 					options: {
 						data: {
-							dharma_name: 'Tân Viên' // Default, will be updated in setup
+							dharma_name: 'Tân Viên'
 						}
 					}
 				});
-
-				console.log('📦 Supabase response:', { data, error });
 
 				if (error) throw error;
 
 				successMessage = 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực.';
 				localStorage.setItem('isGuest', 'false');
-				
-				// If email confirmation is disabled, redirect to setup
+
 				if (data.user && data.session) {
 					setTimeout(() => goto('/setup-profile'), 1500);
 				}
 			} else {
-				// Sign in existing user
-				console.log('🔄 Đang đăng nhập với:', { email });
-				
 				const { data, error } = await supabase.auth.signInWithPassword({
 					email,
 					password
 				});
-
-				console.log('📦 Supabase response:', { data, error });
 
 				if (error) throw error;
 
@@ -85,12 +74,6 @@
 				setTimeout(() => goto('/dashboard'), 1500);
 			}
 		} catch (error: any) {
-			console.error('❌ Lỗi đăng nhập/đăng ký:', error);
-			console.error('   error.message:', error.message);
-			console.error('   error.status:', error.status);
-			console.error('   error.code:', error.code);
-			
-			// Hiển thị lỗi chi tiết hơn
 			if (error.message?.includes('Invalid login credentials')) {
 				errorMessage = 'Sai email hoặc mật khẩu';
 			} else if (error.message?.includes('User already registered')) {
@@ -112,105 +95,133 @@
 	}
 
 	onMount(() => {
-		// Clear any existing guest flag if user comes back to login
+		mounted = true;
 		if (localStorage.getItem('isGuest') === 'true') {
 			localStorage.removeItem('isGuest');
 		}
 	});
 </script>
 
-<div class="min-h-screen bg-zen-cream flex flex-col relative">
-	<!-- Guest Toast Notification -->
+<div class="min-h-screen bg-[#F7F3F0] flex flex-col relative overflow-hidden">
+	<div class="fixed inset-0 overflow-hidden pointer-events-none">
+		<div class="absolute top-1/4 -right-20 w-80 h-80 bg-[#C5A059]/5 rounded-full blur-3xl animate-float-drift"></div>
+		<div class="absolute bottom-1/4 -left-20 w-60 h-60 bg-[#9CAF88]/5 rounded-full blur-3xl animate-float-drift" style="animation-delay: -4s;"></div>
+	</div>
+
 	{#if showGuestToast}
-		<div class="fixed top-6 left-1/2 -translate-x-1/2 right-6 z-50 animate-fadeInUp">
-			<div class="bg-zen-brown text-zen-cream rounded-2xl px-5 py-4 shadow-xl max-w-md mx-auto">
+		<div class="fixed top-8 left-1/2 -translate-x-1/2 right-6 z-50 animate-slide-in-top">
+			<div class="bg-[#3D3028] text-[#F7F3F0] rounded-2xl px-6 py-4 shadow-xl max-w-sm mx-auto">
 				<div class="flex items-start gap-3">
-					<svg class="w-6 h-6 text-zen-gold flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="w-5 h-5 text-[#C5A059] flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 						<circle cx="12" cy="12" r="10"/>
 						<path d="M12 8v4M12 16h.01"/>
 					</svg>
-					<div>
-						<p class="font-medium text-sm">Lưu ý: Bạn đang dùng tài khoản Khách. Công đức sẽ chỉ lưu trên thiết bị này và không được xếp hạng.</p>
-					</div>
+					<p class="text-sm leading-relaxed">Lưu ý: Bạn đang dùng tài khoản Khách. Công đức sẽ chỉ lưu trên thiết bị này.</p>
 				</div>
 			</div>
 		</div>
 	{/if}
 
-	<!-- Header -->
-	<header class="px-4 py-4">
-		<button onclick={() => goto('/')} class="p-2 rounded-full hover:bg-zen-brown/5 transition-colors">
-			<ArrowLeft class="w-6 h-6 text-zen-brown" />
+	<header class="px-6 py-6 relative z-10">
+		<button
+			onclick={() => goto('/onboarding')}
+			class="p-2 -ml-2 rounded-full hover:bg-[#3D3028]/5 transition-colors animate-fade-in"
+		>
+			<svg class="w-6 h-6 text-[#5C4F44]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M19 12H5M12 19l-7-7 7-7"/>
+			</svg>
 		</button>
 	</header>
 
-	<!-- Main Content -->
-	<main class="flex-1 flex flex-col items-center justify-center px-6 py-8">
-		<div class="w-full max-w-md stagger-children">
-			<!-- Title -->
+	<main class="flex-1 flex flex-col items-center justify-center px-8 py-4 relative z-10">
+		<div class="w-full max-w-sm stagger-children">
+			<div class="text-center mb-10 animate-lotus-bloom" style="animation-delay: 0.1s;">
+				<svg class="w-16 h-16 mx-auto text-[#C5A059]" viewBox="0 0 80 80" fill="none">
+					<defs>
+						<linearGradient id="authLotus" x1="0%" y1="100%" x2="0%" y2="0%">
+							<stop offset="0%" stop-color="#C9B896"/>
+							<stop offset="100%" stop-color="#E8DCC8"/>
+						</linearGradient>
+					</defs>
+					<ellipse cx="40" cy="22" rx="7" ry="14" fill="url(#authLotus)" transform="rotate(0 40 48)" opacity="0.8"/>
+					<ellipse cx="40" cy="22" rx="7" ry="14" fill="url(#authLotus)" transform="rotate(60 40 48)" opacity="0.8"/>
+					<ellipse cx="40" cy="22" rx="7" ry="14" fill="url(#authLotus)" transform="rotate(120 40 48)" opacity="0.8"/>
+					<ellipse cx="40" cy="22" rx="7" ry="14" fill="url(#authLotus)" transform="rotate(180 40 48)" opacity="0.8"/>
+					<ellipse cx="40" cy="22" rx="7" ry="14" fill="url(#authLotus)" transform="rotate(240 40 48)" opacity="0.8"/>
+					<ellipse cx="40" cy="22" rx="7" ry="14" fill="url(#authLotus)" transform="rotate(300 40 48)" opacity="0.8"/>
+					<circle cx="40" cy="48" r="5" fill="#C9B896"/>
+				</svg>
+			</div>
+
 			<div class="text-center mb-10">
-				<h1 class="font-serif text-3xl md:text-4xl font-semibold text-zen-brown mb-2">
-					Chào mừng
+				<h1 class="font-serif text-3xl font-light text-[#3D3028] mb-2 tracking-wide">
+					{isSignUp ? 'Tạo tài khoản' : 'Đăng nhập'}
 				</h1>
-				<p class="text-zen-brown/60">
-					Tích lũy công đức mỗi ngày
+				<p class="text-[#7A6B5A]/70 text-sm">
+					{isSignUp ? 'Bắt đầu hành trình tích đức của bạn' : 'Chào mừng trở lại'}
 				</p>
 			</div>
 
-			<!-- Form -->
-			<form class="space-y-4" onsubmit={handleSubmit}>
-				<!-- Email Input -->
-				<div class="relative">
+			<form class="space-y-5" onsubmit={handleSubmit}>
+				<div class="relative animate-fade-in-up" style="animation-delay: 0.2s;">
 					<input
 						type="email"
 						placeholder="Email"
 						bind:value={email}
-						class="w-full px-4 py-4 pl-12 bg-zen-cream border border-zen-brown/10 rounded-2xl text-zen-brown placeholder:text-zen-brown/40 focus:outline-none focus:border-zen-gold focus:ring-2 focus:ring-zen-gold/20 transition-all focus-visible:ring-2 focus-visible:ring-zen-gold/30 focus-visible:ring-offset-2"
+						class="w-full px-5 py-4 pl-12 bg-[#FAF8F5] border border-[#E8E0D8] rounded-2xl text-[#3D3028] placeholder:text-[#7A6B5A]/40 focus:outline-none focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 transition-all"
 					/>
-					<Mail class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zen-brown/30" />
+					<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#7A6B5A]/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<rect x="2" y="4" width="20" height="16" rx="2"/>
+						<path d="M22 6l-10 7L2 6"/>
+					</svg>
 				</div>
 
-				<!-- Password Input -->
-				<div class="relative">
+				<div class="relative animate-fade-in-up" style="animation-delay: 0.3s;">
 					<input
 						type={showPassword ? 'text' : 'password'}
 						placeholder="Mật khẩu"
 						bind:value={password}
-						class="w-full px-4 py-4 pl-12 pr-12 bg-zen-cream border border-zen-brown/10 rounded-2xl text-zen-brown placeholder:text-zen-brown/40 focus:outline-none focus:border-zen-gold focus:ring-2 focus:ring-zen-gold/20 transition-all focus-visible:ring-2 focus-visible:ring-zen-gold/30 focus-visible:ring-offset-2"
+						class="w-full px-5 py-4 pl-12 pr-12 bg-[#FAF8F5] border border-[#E8E0D8] rounded-2xl text-[#3D3028] placeholder:text-[#7A6B5A]/40 focus:outline-none focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 transition-all"
 					/>
-					<Lock class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zen-brown/30" />
+					<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#7A6B5A]/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<rect x="3" y="11" width="18" height="11" rx="2"/>
+						<path d="M7 11V7a5 5 0 0110 0v4"/>
+					</svg>
 					<button
 						type="button"
 						onclick={() => showPassword = !showPassword}
-						class="absolute right-4 top-1/2 -translate-y-1/2 text-zen-brown/40 hover:text-zen-brown/60 transition-colors"
+						class="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A6B5A]/40 hover:text-[#7A6B5A]/60 transition-colors"
 					>
 						{#if showPassword}
-							<EyeOff class="w-5 h-5" />
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+								<line x1="1" y1="1" x2="23" y2="23"/>
+							</svg>
 						{:else}
-							<Eye class="w-5 h-5" />
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+								<circle cx="12" cy="12" r="3"/>
+							</svg>
 						{/if}
 					</button>
 				</div>
 
-				<!-- Error Message -->
 				{#if errorMessage}
-					<div class="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm animate-fadeIn">
+					<div class="bg-red-50/80 backdrop-blur text-red-600 px-4 py-3 rounded-xl text-sm animate-fade-in">
 						{errorMessage}
 					</div>
 				{/if}
 
-				<!-- Success Message -->
 				{#if successMessage}
-					<div class="bg-green-50 text-green-600 px-4 py-3 rounded-xl text-sm animate-fadeIn">
+					<div class="bg-green-50/80 backdrop-blur text-green-600 px-4 py-3 rounded-xl text-sm animate-fade-in">
 						{successMessage}
 					</div>
 				{/if}
 
-				<!-- Submit Button -->
 				<button
 					type="submit"
 					disabled={isLoading}
-					class="w-full py-4 bg-zen-brown text-zen-cream rounded-2xl font-medium text-lg transition-all duration-300 hover:bg-zen-brown/90 hover:shadow-lg hover:shadow-zen-brown/20 mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+					class="w-full py-4 bg-[#3D3028] text-[#F7F3F0] rounded-2xl font-medium text-base transition-all duration-300 hover:bg-[#3D3028]/90 hover:shadow-lg hover:shadow-[#3D3028]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
 				>
 					{#if isLoading}
 						<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -224,32 +235,35 @@
 				</button>
 			</form>
 
-			<!-- Toggle Sign Up / Sign In -->
-			<div class="mt-4 text-center">
+			<div class="mt-6 text-center animate-fade-in-up" style="animation-delay: 0.4s;">
 				<button
 					type="button"
 					onclick={toggleSignUp}
-					class="text-zen-brown/60 hover:text-zen-brown text-sm transition-colors"
+					class="text-[#7A6B5A] hover:text-[#3D3028] text-sm transition-colors"
 				>
-					{isSignUp ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'}
+					{isSignUp ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}
+					<span class="font-medium underline underline-offset-4">{isSignUp ? 'Đăng nhập' : 'Đăng ký'}</span>
 				</button>
 			</div>
 
-			<!-- Guest Mode -->
-			<div class="mt-6 text-center">
-				<button
-					type="button"
-					onclick={handleGuestLogin}
-					class="text-zen-brown/50 hover:text-zen-brown/70 text-sm transition-colors"
-				>
-					Tiếp tục với tư cách Khách
-				</button>
+			<div class="flex items-center gap-4 my-8 animate-fade-in-up" style="animation-delay: 0.5s;">
+				<div class="flex-1 h-px bg-[#E8E0D8]"></div>
+				<span class="text-[#7A6B5A]/40 text-xs uppercase tracking-wider">hoặc</span>
+				<div class="flex-1 h-px bg-[#E8E0D8]"></div>
 			</div>
 
-			<!-- App tagline -->
-			<div class="mt-12 text-center">
-				<p class="text-zen-brown/30 text-xs">
-					Tích Công Đức v1.0.0
+			<button
+				type="button"
+				onclick={handleGuestLogin}
+				class="w-full py-4 bg-[#F2EDE6] text-[#5C4F44] rounded-2xl font-medium text-base transition-all duration-300 hover:bg-[#E8E2DA] border border-[#E8E0D8] animate-fade-in-up"
+				style="animation-delay: 0.6s;"
+			>
+				Tiếp tục với tài khoản Khách
+			</button>
+
+			<div class="mt-12 text-center animate-fade-in" style="animation-delay: 0.8s;">
+				<p class="text-[#3D3028]/20 text-xs italic">
+					"Vô vi thành, vô vi được"
 				</p>
 			</div>
 		</div>
@@ -261,10 +275,10 @@
 		font-family: 'Playfair Display', Georgia, serif;
 	}
 
-	@keyframes fadeInUp {
+	@keyframes slide-in-top {
 		from {
 			opacity: 0;
-			transform: translateX(-50%) translateY(-10px);
+			transform: translateX(-50%) translateY(-20px);
 		}
 		to {
 			opacity: 1;
@@ -272,7 +286,7 @@
 		}
 	}
 
-	.animate-fadeInUp {
-		animation: fadeInUp 0.3s ease-out forwards;
+	.animate-slide-in-top {
+		animation: slide-in-top 0.4s ease-out forwards;
 	}
 </style>

@@ -1,8 +1,12 @@
 <script lang="ts">
-  export let size: number = 200;
-  export let animated: boolean = true;
-  export let glowIntensity: number = 0.15;
-  export let meritValue: number = 1;
+  interface Props {
+    size?: number;
+    animated?: boolean;
+    glowIntensity?: number;
+    meritValue?: number;
+  }
+
+  let { size = 200, animated = true, glowIntensity = 0.15, meritValue = 1 }: Props = $props();
 
   const uid = Math.random().toString(36).substring(2, 9);
 </script>

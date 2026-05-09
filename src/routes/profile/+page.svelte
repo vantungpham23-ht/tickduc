@@ -1,26 +1,23 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Sparkles } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import BottomNav from '$lib/components/BottomNav.svelte';
+	import LevelAvatar from '$lib/components/LevelAvatar.svelte';
 	import { supabase } from '$lib/supabase';
+	import { getLevelInfo, type LevelInfo } from '$lib/components/levels/index';
 
 	// User data
 	let dharmaName = $state('Tân Viên');
-	let avatarEmoji = $state('');
 	let totalMerits = $state(0);
 	let isGuest = $state(false);
 	let isLoading = $state(true);
+	let mounted = $state(false);
+	let currentLevel = $state<LevelInfo | null>(null);
 
-	// Avatar options - SVG paths cho quiet luxury style
-	const avatarOptions = [
-		{ id: 'lotus', label: 'Hoa sen' },
-		{ id: 'sun', label: 'Mặt trời' },
-		{ id: 'moon', label: 'Trăng' },
-		{ id: 'star', label: 'Sao' },
-		{ id: 'leaf', label: 'Lá' },
-		{ id: 'flame', label: 'Lửa' },
-	];
+	// Edit name state
+	let isEditingName = $state(false);
+	let editedName = $state('');
+	let isSavingName = $state(false);
 
 	async function fetchUserData() {
 		isLoading = true;
@@ -28,9 +25,9 @@
 
 		if (isGuest) {
 			dharmaName = localStorage.getItem('guestDharmaName') || 'Khách';
-			avatarEmoji = '';
 			totalMerits = parseInt(localStorage.getItem('guestMerit') || '0');
 			isLoading = false;
+			currentLevel = getLevelInfo(totalMerits);
 			return;
 		}
 
@@ -49,7 +46,6 @@
 
 			if (profile) {
 				dharmaName = profile.dharma_name || 'Tân Viên';
-				avatarEmoji = profile.avatar_emoji || '';
 				totalMerits = profile.total_merits || 0;
 			}
 		} catch (error) {
@@ -57,199 +53,278 @@
 		}
 
 		isLoading = false;
+		currentLevel = getLevelInfo(totalMerits);
 	}
 
-	async function updateAvatar(id: string) {
-		avatarEmoji = id;
+	function startEditName() {
+		editedName = dharmaName;
+		isEditingName = true;
+	}
+
+	async function saveName() {
+		if (!editedName.trim()) return;
+
+		isSavingName = true;
+		dharmaName = editedName.trim();
 
 		if (isGuest) {
-			localStorage.setItem('guestAvatarEmoji', id);
-			return;
+			localStorage.setItem('guestDharmaName', dharmaName);
+		} else {
+			try {
+				const { data: { user } } = await supabase.auth.getUser();
+				if (user) {
+					await supabase
+						.from('profiles')
+						.update({ dharma_name: dharmaName })
+						.eq('id', user.id);
+				}
+			} catch (error) {
+				console.error('Error saving name:', error);
+			}
 		}
 
-		try {
-			const { data: { user } } = await supabase.auth.getUser();
-			if (!user) return;
+		isSavingName = false;
+		isEditingName = false;
+	}
 
-			const { error } = await supabase
-				.from('profiles')
-				.update({ avatar_emoji: id })
-				.eq('id', user.id);
+	function cancelEdit() {
+		isEditingName = false;
+		editedName = '';
+	}
 
-			if (error) {
-				console.error('Error updating avatar:', error);
-			}
-		} catch (error) {
-			console.error('Error updating avatar:', error);
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			saveName();
+		} else if (e.key === 'Escape') {
+			cancelEdit();
 		}
 	}
 
 	async function handleLogout() {
 		try {
 			await supabase.auth.signOut();
-			localStorage.removeItem('isGuest');
-			localStorage.removeItem('guestMerit');
-			localStorage.removeItem('guestDharmaName');
-			localStorage.removeItem('guestAvatarEmoji');
-			goto('/');
-		} catch (error) {
-			console.error('Error logging out:', error);
-		}
+		} catch (e) {}
+		localStorage.removeItem('isGuest');
+		localStorage.removeItem('guestMerit');
+		localStorage.removeItem('guestDharmaName');
+		localStorage.removeItem('guestAvatarEmoji');
+		localStorage.removeItem('hasOnboarded');
+		goto('/');
 	}
 
 	onMount(() => {
+		mounted = true;
 		fetchUserData();
 	});
 </script>
 
-<div class="min-h-screen bg-zen-cream pb-24">
+<div class="min-h-screen bg-[#F7F3F0] pb-28 relative overflow-hidden">
+	<!-- Background decorations -->
+	<div class="fixed inset-0 overflow-hidden pointer-events-none">
+		<div class="absolute top-1/4 -left-20 w-64 h-64 bg-[#C5A059]/5 rounded-full blur-3xl animate-float-drift"></div>
+		<div class="absolute bottom-1/3 right-1/4 w-48 h-48 bg-[#9CAF88]/5 rounded-full blur-3xl animate-float-drift" style="animation-delay: -4s;"></div>
+	</div>
+
 	<!-- Header -->
-	<header class="px-6 py-6">
-		<div class="flex items-center justify-between">
-			<h1 class="font-serif text-2xl font-semibold text-zen-brown">Cá nhân</h1>
-			<button 
-				onclick={() => goto('/dashboard')} 
-				class="p-2 rounded-full hover:bg-zen-brown/5 transition-colors"
+	<header class="relative px-6 py-6 z-10">
+		<div class="flex items-center justify-between animate-fade-in-up">
+			<h1 class="font-serif text-2xl font-light text-[#3D3228]">Cá Nhân</h1>
+			<button
+				onclick={() => goto('/dashboard')}
+				class="p-2 -mr-2 rounded-full hover:bg-[#3D3028]/5 transition-colors"
 			>
-				<ArrowLeft class="w-6 h-6 text-zen-brown" strokeWidth={1.5} />
+				<svg class="w-6 h-6 text-[#5C4F44]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M19 12H5M12 19l-7-7 7-7"/>
+				</svg>
 			</button>
 		</div>
 	</header>
 
 	<!-- Main Content -->
-	<main class="px-6">
+	<main class="px-6 relative z-10">
 		<!-- Profile Card -->
-		<div class="bg-zen-parchment rounded-3xl p-8 shadow-sm text-center mb-6">
-			<!-- Avatar with SVG -->
-			<div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-zen-gold to-zen-brown flex items-center justify-center mb-4 shadow-lg shadow-zen-gold/20">
-				{#if avatarEmoji === 'lotus' || avatarEmoji === ''}
-					<svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<ellipse cx="24" cy="42" rx="5" ry="2.5"/>
-						<path d="M24 38 C24 38 19 32 19 26 C19 20 24 14 24 14 C24 14 29 20 29 26 C29 32 24 38 24 38"/>
-						<path d="M19 34 C15 28 12 24 12 20 C12 16 17 14 21 16"/>
-						<path d="M29 34 C33 28 36 24 36 20 C36 16 31 14 27 16"/>
-					</svg>
-				{:else if avatarEmoji === 'sun'}
-					<svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<circle cx="24" cy="24" r="8"/>
-						<path d="M24 8v6M24 34v6M8 24h6M34 24h6M12.5 12.5l4.2 4.2M31.3 31.3l4.2 4.2M35.5 12.5l-4.2 4.2M16.7 31.3l-4.2 4.2"/>
-					</svg>
-				{:else if avatarEmoji === 'moon'}
-					<svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M36 24c0-8.284-5.716-15-13-15-1.126 0-2.218.14-3.26.4C25.1 11.2 29 16 29 21.5c0 5.5-3.9 10.3-9.26 12.1 1.04.26 2.13.4 3.26.4 7.284 0 13-6.716 13-15z"/>
-					</svg>
-				{:else if avatarEmoji === 'star'}
-					<svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M24 8l4.9 10 11 1.6-8 7.8 1.9 11-9.8-5.2-9.8 5.2 1.9-11-8-7.8 11-1.6z"/>
-					</svg>
-				{:else if avatarEmoji === 'leaf'}
-					<svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M12 36 C12 24 20 12 36 12 C36 12 36 36 24 36 C18 36 12 36 12 36"/>
-						<path d="M12 36 C20 32 28 24 36 12"/>
-					</svg>
-				{:else if avatarEmoji === 'flame'}
-					<svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M24 44 C16 36 12 28 12 22 C12 14 18 8 24 8 C24 8 24 14 28 14 C32 14 36 18 36 24 C36 28 34 32 32 34 C30 36 26 38 24 44"/>
-					</svg>
+		<div class="bg-gradient-to-br from-[#F2EDE6] to-[#FAF8F5] rounded-3xl p-8 shadow-sm border border-[#E8E0D8]/50 text-center mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+			<!-- Avatar with Level-based SVG -->
+			<button onclick={() => goto('/profile/level')} class="relative inline-block group">
+				<!-- Golden glow halo -->
+				<div class="absolute inset-0 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 left-1/2 top-0">
+					<div
+						class="w-36 h-36 rounded-full bg-gradient-to-br from-[#C5A059]/20 via-[#C9B896]/15 to-transparent blur-xl group-hover:scale-110 transition-transform duration-500"
+					></div>
+				</div>
+
+				<div class="relative w-28 h-28 rounded-full overflow-hidden shadow-lg shadow-[#C5A059]/20 border-4 border-[#E8DCC8] mx-auto bg-[#FAF8F5]">
+					{#if isLoading}
+						<div class="w-full h-full flex items-center justify-center">
+							<div class="w-8 h-8 border-2 border-[#C5A059]/30 border-t-[#C5A059] rounded-full animate-spin"></div>
+						</div>
+					{:else}
+						<LevelAvatar level={currentLevel?.level || 1} size="2xl" showGlow={false} class="w-full h-full" />
+					{/if}
+				</div>
+
+				<!-- Tap hint -->
+				<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#3D3028]/80 text-white text-xs rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+					Xem cấp bậc
+				</div>
+			</button>
+
+			<!-- Editable Dharma Name -->
+			<div class="mt-5">
+				{#if isEditingName}
+					<div class="flex items-center justify-center gap-2">
+						<input
+							type="text"
+							bind:value={editedName}
+							onkeydown={handleKeydown}
+							maxlength="20"
+							class="px-4 py-2 bg-[#FAF8F5] border-2 border-[#C5A059]/40 rounded-2xl text-[#3D3228] text-xl text-center font-serif focus:outline-none focus:border-[#C5A059] w-48"
+							autofocus
+						/>
+						<button
+							onclick={saveName}
+							disabled={isSavingName}
+							class="p-2 rounded-full bg-[#C5A059] text-white hover:bg-[#A69070] transition-colors disabled:opacity-50"
+						>
+							{#if isSavingName}
+								<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+								</svg>
+							{:else}
+								<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<polyline points="20,6 9,17 4,12"/>
+								</svg>
+							{/if}
+						</button>
+						<button
+							onclick={cancelEdit}
+							class="p-2 rounded-full bg-[#EDE8E3] text-[#5C4F44] hover:bg-[#E8E2DA] transition-colors"
+						>
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="18" y1="6" x2="6" y2="18"/>
+								<line x1="6" y1="6" x2="18" y2="18"/>
+							</svg>
+						</button>
+					</div>
+				{:else}
+					<button
+						onclick={startEditName}
+						class="group inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-[#F2EDE6] transition-colors"
+					>
+						<h2 class="font-serif text-2xl font-light text-[#3D3228] tracking-wide">
+							{#if isLoading}
+								<span class="opacity-50">...</span>
+							{:else}
+								{dharmaName}
+							{/if}
+						</h2>
+						<svg class="w-4 h-4 text-[#7A6B5A]/50 group-hover:text-[#7A6B5A] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+							<path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+						</svg>
+					</button>
 				{/if}
 			</div>
-			
-			<!-- Dharma Name -->
-			<h2 class="font-serif text-2xl font-semibold text-zen-brown mb-2">
-				{#if isLoading}
-					<span class="opacity-50">...</span>
-				{:else}
-					{dharmaName}
-				{/if}
-			</h2>
-			
+
+			<!-- Level Badge -->
+			{#if currentLevel && !isLoading}
+				<button onclick={() => goto('/profile/level')} class="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-[#C5A059]/10 rounded-full border border-[#C5A059]/20 hover:bg-[#C5A059]/20 transition-colors">
+					<div class="w-5 h-5">
+						<LevelAvatar level={currentLevel.level} size="sm" showGlow={false} />
+					</div>
+					<span class="text-[#C5A059] text-sm font-medium">{currentLevel.name}</span>
+					<svg class="w-4 h-4 text-[#C5A059]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="9,18 15,12 9,6"/>
+					</svg>
+				</button>
+			{/if}
+
 			<!-- Merits -->
-			<div class="flex items-center justify-center gap-2 text-zen-gold">
-				<Sparkles class="w-5 h-5" strokeWidth={1.5} />
-				<span class="font-semibold">
+			<div class="flex items-center justify-center gap-2 mt-4">
+				<svg class="w-5 h-5 text-[#C5A059]" viewBox="0 0 24 24" fill="currentColor">
+					<path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8Z"/>
+				</svg>
+				<span class="font-medium text-[#5C4F44]">
 					{#if isLoading}
 						<span class="opacity-50">...</span>
 					{:else}
 						{totalMerits.toLocaleString()}
 					{/if}
 				</span>
-				<span class="text-zen-brown/50">công đức</span>
+				<span class="text-[#7A6B5A]/50">công đức</span>
 			</div>
 
 			{#if isGuest}
-				<div class="mt-4 px-4 py-2 bg-amber-50 rounded-full inline-block">
+				<div class="mt-4 px-4 py-2 bg-amber-50 rounded-full inline-block animate-fade-in">
 					<span class="text-amber-700 text-sm">Chế độ Khách</span>
 				</div>
 			{/if}
 		</div>
 
-		<!-- Change Avatar -->
-		<div class="bg-zen-parchment rounded-3xl p-6 shadow-sm">
-			<h3 class="font-serif text-lg font-semibold text-zen-brown mb-4 text-center">
-				Đổi Avatar
-			</h3>
-			
-			<div class="grid grid-cols-3 gap-4">
-				{#each avatarOptions as option}
-					<button
-						onclick={() => updateAvatar(option.id)}
-						class="w-full aspect-square rounded-2xl flex flex-col items-center justify-center transition-all duration-200 {avatarEmoji === option.id ? 'bg-zen-gold text-zen-cream' : 'bg-zen-linen hover:bg-zen-brown/10'}"
-					>
-						{#if option.id === 'lotus'}
-							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<ellipse cx="24" cy="42" rx="5" ry="2.5"/>
-								<path d="M24 38 C24 38 19 32 19 26 C19 20 24 14 24 14 C24 14 29 20 29 26 C29 32 24 38 24 38"/>
-								<path d="M19 34 C15 28 12 24 12 20 C12 16 17 14 21 16"/>
-								<path d="M29 34 C33 28 36 24 36 20 C36 16 31 14 27 16"/>
-							</svg>
-						{:else if option.id === 'sun'}
-							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<circle cx="24" cy="24" r="8"/>
-								<path d="M24 8v6M24 34v6M8 24h6M34 24h6M12.5 12.5l4.2 4.2M31.3 31.3l4.2 4.2M35.5 12.5l-4.2 4.2M16.7 31.3l-4.2 4.2"/>
-							</svg>
-						{:else if option.id === 'moon'}
-							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M36 24c0-8.284-5.716-15-13-15-1.126 0-2.218.14-3.26.4C25.1 11.2 29 16 29 21.5c0 5.5-3.9 10.3-9.26 12.1 1.04.26 2.13.4 3.26.4 7.284 0 13-6.716 13-15z"/>
-							</svg>
-						{:else if option.id === 'star'}
-							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M24 8l4.9 10 11 1.6-8 7.8 1.9 11-9.8-5.2-9.8 5.2 1.9-11-8-7.8 11-1.6z"/>
-							</svg>
-						{:else if option.id === 'leaf'}
-							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M12 36 C12 24 20 12 36 12 C36 12 36 36 24 36 C18 36 12 36 12 36"/>
-								<path d="M12 36 C20 32 28 24 36 12"/>
-							</svg>
-						{:else if option.id === 'flame'}
-							<svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M24 44 C16 36 12 28 12 22 C12 14 18 8 24 8 C24 8 24 14 28 14 C32 14 36 18 36 24 C36 28 34 32 32 34 C30 36 26 38 24 44"/>
-							</svg>
-						{/if}
-						<span class="text-xs mt-2">{option.label}</span>
-					</button>
-				{/each}
+		<!-- Quick Actions -->
+		<div class="bg-gradient-to-br from-[#F2EDE6] to-[#FAF8F5] rounded-3xl p-6 shadow-sm border border-[#E8E0D8]/50 animate-fade-in-up" style="animation-delay: 0.2s;">
+			<h3 class="font-serif text-lg font-light text-[#3D3228] mb-5 tracking-wide text-center">Hành Trình</h3>
+
+			<div class="space-y-3">
+				<button
+					onclick={() => goto('/profile/level')}
+					class="w-full flex items-center gap-4 p-4 bg-[#EDE8E3] rounded-2xl hover:bg-[#E8E2DA] transition-colors group"
+				>
+					<div class="w-12 h-12 rounded-xl bg-[#C5A059]/15 flex items-center justify-center">
+						<svg class="w-6 h-6 text-[#C5A059]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+						</svg>
+					</div>
+					<div class="flex-1 text-left">
+						<p class="font-medium text-[#3D3228] text-sm">Cấp Bậc Tu Tập</p>
+						<p class="text-[#7A6B5A]/60 text-xs mt-0.5">Xem tiến trình của bạn</p>
+					</div>
+					<svg class="w-5 h-5 text-[#7A6B5A]/40 group-hover:text-[#7A6B5A] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="9,18 15,12 9,6"/>
+					</svg>
+				</button>
+
+				<button
+					onclick={() => goto('/guide')}
+					class="w-full flex items-center gap-4 p-4 bg-[#EDE8E3] rounded-2xl hover:bg-[#E8E2DA] transition-colors group"
+				>
+					<div class="w-12 h-12 rounded-xl bg-[#9CAF88]/15 flex items-center justify-center">
+						<svg class="w-6 h-6 text-[#9CAF88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="10"/>
+							<path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+							<path d="M12 17h.01"/>
+						</svg>
+					</div>
+					<div class="flex-1 text-left">
+						<p class="font-medium text-[#3D3228] text-sm">Hướng Dẫn</p>
+						<p class="text-[#7A6B5A]/60 text-xs mt-0.5">Tìm hiểu cách tu tập</p>
+					</div>
+					<svg class="w-5 h-5 text-[#7A6B5A]/40 group-hover:text-[#7A6B5A] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="9,18 15,12 9,6"/>
+					</svg>
+				</button>
 			</div>
 		</div>
 
-		<!-- Guest Mode Info -->
+		<!-- Guest Mode / Logout -->
 		{#if isGuest}
-			<div class="mt-6 text-center">
-				<p class="text-zen-brown/50 text-sm">
+			<div class="mt-6 text-center animate-fade-in-up" style="animation-delay: 0.3s;">
+				<p class="text-[#7A6B5A]/50 text-sm">
 					Đăng nhập để đồng bộ dữ liệu
 				</p>
 				<button
 					onclick={() => goto('/auth')}
-					class="mt-3 px-6 py-3 bg-zen-gold text-zen-cream rounded-full font-medium hover:bg-zen-gold/90 transition-colors"
+					class="mt-3 px-8 py-3 bg-gradient-to-r from-[#C5A059] to-[#A69070] text-white rounded-full font-medium hover:shadow-lg hover:shadow-[#C5A059]/20 transition-all"
 				>
 					Đăng nhập
 				</button>
 			</div>
 		{:else}
-			<!-- Logout Button -->
-			<div class="mt-6">
+			<div class="mt-6 animate-fade-in-up" style="animation-delay: 0.3s;">
 				<button
 					onclick={handleLogout}
-					class="w-full py-3 bg-zen-linen text-zen-brown-warm rounded-xl font-medium hover:bg-zen-brown/10 transition-colors flex items-center justify-center gap-2"
+					class="w-full py-4 bg-[#EDE8E3] text-[#5C4F44] rounded-2xl font-medium hover:bg-[#E8E2DA] transition-all duration-300 flex items-center justify-center gap-3 border border-[#E8E0D8]"
 				>
 					<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
@@ -260,12 +335,12 @@
 				</button>
 			</div>
 		{/if}
-	</main>
 
-	<!-- App Version -->
-	<div class="text-center mt-8 text-zen-brown/30 text-sm">
-		<p>Tích Công Đức v1.0.0</p>
-	</div>
+		<!-- App Version -->
+		<div class="text-center mt-10 animate-fade-in" style="animation-delay: 0.5s;">
+			<p class="text-[#3D3028]/20 text-sm">Tích Công Đức v1.0.0</p>
+		</div>
+	</main>
 </div>
 
 <!-- Bottom Navigation -->

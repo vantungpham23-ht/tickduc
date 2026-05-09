@@ -22,7 +22,7 @@
 
 	// Audio
 	let audioContext: AudioContext | null = null;
-	let mokugyoBuffer: AudioBuffer | null = null;
+	let bellBuffer: AudioBuffer | null = null;
 
 	// Toast
 	let showMeritToast = $state(false);
@@ -30,26 +30,26 @@
 
 	// Constants
 	const PRAYING_DURATION = 10;
-	const PRAYING_THRESHOLD = 0.2; // Khoảng cách giữa 2 tay để xác nhận chắp tay
+	const PRAYING_THRESHOLD = 0.2;
 
 	async function loadAudioFiles() {
 		try {
 			audioContext = new AudioContext();
-			const response = await fetch('/mokugyo.mp3');
+			const response = await fetch('/bell.mp3');
 			const data = await response.arrayBuffer();
-			mokugyoBuffer = await audioContext.decodeAudioData(data);
+			bellBuffer = await audioContext.decodeAudioData(data);
 		} catch (error) {
 			console.error('Error loading audio:', error);
 		}
 	}
 
 	function playSound(volume: number = 0.8) {
-		if (!audioContext || !mokugyoBuffer) return;
+		if (!audioContext || !bellBuffer) return;
 		if (audioContext.state === 'suspended') audioContext.resume();
 
 		const source = audioContext.createBufferSource();
 		const gainNode = audioContext.createGain();
-		source.buffer = mokugyoBuffer;
+		source.buffer = bellBuffer;
 		gainNode.gain.value = volume;
 		source.connect(gainNode);
 		gainNode.connect(audioContext.destination);
@@ -118,7 +118,7 @@
 		if (!videoElement || !handLandmarker || !cameraActive) return;
 
 		const renderLoop = (timestamp: number) => {
-			if (lastTimestamp !== timestamp) {
+			if (lastTimestamp !== timestamp && videoElement && handLandmarker) {
 				const results = handLandmarker.detectForVideo(videoElement, timestamp);
 				lastTimestamp = timestamp;
 				drawHandLandmarks(results);

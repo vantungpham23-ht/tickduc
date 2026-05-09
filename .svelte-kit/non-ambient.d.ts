@@ -29,7 +29,7 @@ declare module "$app/types" {
 	type MatcherParam<M> = M extends (param : string) => param is (infer U extends string) ? U : string;
 
 	export interface AppTypes {
-		RouteId(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/mokugyo" | "/praying" | "/profile" | "/profile/level" | "/settings" | "/setup-profile";
+		RouteId(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/mokugyo" | "/onboarding" | "/praying" | "/profile" | "/profile/level" | "/settings" | "/setup-profile";
 		RouteParams(): {
 			
 		};
@@ -42,13 +42,14 @@ declare module "$app/types" {
 			"/leaderboard": Record<string, never>;
 			"/meditate": Record<string, never>;
 			"/mokugyo": Record<string, never>;
+			"/onboarding": Record<string, never>;
 			"/praying": Record<string, never>;
 			"/profile": Record<string, never>;
 			"/profile/level": Record<string, never>;
 			"/settings": Record<string, never>;
 			"/setup-profile": Record<string, never>
 		};
-		Pathname(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/mokugyo" | "/praying" | "/profile" | "/settings" | "/setup-profile";
+		Pathname(): "/" | "/auth" | "/buddhist" | "/dashboard" | "/guide" | "/leaderboard" | "/meditate" | "/mokugyo" | "/onboarding" | "/praying" | "/profile" | "/profile/level" | "/settings" | "/setup-profile";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
 		Asset(): "/.DS_Store" | "/bell.mp3" | "/medi.mp3" | "/medi2.mp3" | "/mokugyo.mp3" | "/robots.txt" | string & {};
 	}

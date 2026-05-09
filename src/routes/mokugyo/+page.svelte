@@ -197,7 +197,7 @@
 		if (!videoElement || !handLandmarker || !cameraActive) return;
 
 		const renderLoop = (timestamp: number) => {
-			if (lastTimestamp !== timestamp) {
+			if (lastTimestamp !== timestamp && videoElement && handLandmarker) {
 				const results = handLandmarker.detectForVideo(videoElement, timestamp);
 				lastTimestamp = timestamp;
 
@@ -328,7 +328,7 @@
 			showRipple = false;
 		}, 500);
 
-		if (tapCount > 0 && tapCount % 108 === 0) {
+		if (tapCount >= 108) {
 			triggerMeritMilestone();
 		}
 
@@ -343,7 +343,10 @@
 		clearTimeout(toastTimeout);
 		toastTimeout = setTimeout(() => {
 			showMeritToast = false;
-		}, 3000);
+		}, 4000);
+
+		tapCount = 0;
+		sessionCount = 0;
 	}
 
 	function saveTapCount() {
@@ -360,7 +363,7 @@
 			const isGuest = localStorage.getItem('isGuest') === 'true';
 			if (isGuest) {
 				const currentMerit = parseInt(localStorage.getItem('guestMerit') || '0');
-				localStorage.setItem('guestMerit', String(currentMerit + 1));
+				localStorage.setItem('guestMerit', String(currentMerit + 10));
 				return;
 			}
 
@@ -369,14 +372,14 @@
 
 			await supabase.from('merit_logs').insert({
 				user_id: user.id,
-				merits_earned: 1,
+				merits_earned: 10,
 				merit_type: 'mokugyo',
 				duration_seconds: 0
 			});
 
 			await supabase.rpc('add_merit', {
 				p_user_id: user.id,
-				p_merits: 1,
+				p_merits: 10,
 				p_duration: 0
 			});
 		} catch (error) {
@@ -551,7 +554,7 @@
 	{#if showMeritToast}
 		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in-up">
 			<div class="bg-[#3D3028] text-[#F7F3F0] px-8 py-4 rounded-2xl shadow-2xl text-center">
-				<p class="font-serif text-lg tracking-wide mb-1">+1 Công đức</p>
+				<p class="font-serif text-lg tracking-wide mb-1">+10 Công đức</p>
 				<p class="text-[#C5A059] text-sm tracking-wider">Chúc mừng bạn!</p>
 			</div>
 		</div>
