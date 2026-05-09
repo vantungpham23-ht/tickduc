@@ -15,6 +15,7 @@
 	let { level, size = 'md', showGlow = true, class: className = '' }: Props = $props();
 
 	const sizeClasses = {
+		xs: 'w-5 h-5',
 		sm: 'w-8 h-8',
 		md: 'w-12 h-12',
 		lg: 'w-16 h-16',
@@ -23,6 +24,7 @@
 	};
 
 	const glowSizes = {
+		xs: 'w-10 h-10',
 		sm: 'w-16 h-16',
 		md: 'w-20 h-20',
 		lg: 'w-28 h-28',

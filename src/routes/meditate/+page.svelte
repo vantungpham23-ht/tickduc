@@ -388,7 +388,7 @@
 						viewBox="0 0 24 24" 
 						style="transform: rotate({particle.rotation}deg)"
 					>
-						<ellipse cx="12" cy="12" rx="6" ry="10" fill="#E8DCC8" transform="rotate(-15 12 12)"/>
+						<ellipse cx="12" cy="12" rx="6" ry="10" fill="#D4B896" transform="rotate(-15 12 12)"/>
 					</svg>
 				{:else}
 					<svg 
@@ -397,7 +397,7 @@
 						viewBox="0 0 24 24" 
 						style="transform: rotate({particle.rotation}deg)"
 					>
-						<path d="M12 2C8 6 4 10 4 14c0 4 4 6 8 6s8-2 8-6c0-4-4-8-8-12z" fill="#9CAF88" opacity="0.7"/>
+						<path d="M12 2C8 6 4 10 4 14c0 4 4 6 8 6s8-2 8-6c0-4-4-8-8-12z" fill="#93B1A7" opacity="0.7"/>
 					</svg>
 				{/if}
 			</div>
@@ -529,7 +529,7 @@
 	<!-- Merit Toast -->
 	{#if showMeritToast}
 		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50" style="animation: fadeInUp 0.8s ease-out forwards;">
-			<div class="bg-white text-[#3D3028] px-10 py-6 rounded-2xl shadow-2xl text-center">
+			<div class="bg-[#242018] backdrop-blur-2xl border border-[#C5A059]/20 text-[#F5F0E8] px-8 py-5 rounded-2xl shadow-2xl text-center">
 				<p class="font-serif text-xl tracking-wide mb-2">+100 Công đức</p>
 				<p class="text-[#93B1A7] text-sm tracking-wider">Nam mô Quan Thế Âm</p>
 			</div>
@@ -538,7 +538,7 @@
 
 	<!-- Loading -->
 	{#if isLoading}
-		<div class="absolute inset-0 flex items-center justify-center z-40 bg-black/80">
+		<div class="absolute inset-0 flex items-center justify-center z-40 bg-[#1A1814]/90">
 			<div class="text-center">
 				<div class="w-16 h-16 mx-auto mb-4 rounded-full border border-white/20" style="animation: pulse 2s ease-in-out infinite;"></div>
 				<p class="text-white/60 text-sm tracking-wide">Đang khởi tạo camera...</p>
