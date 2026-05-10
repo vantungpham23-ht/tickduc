@@ -43,6 +43,18 @@
   --color-warning: #C5A059;
   --color-error: #C4A89C;
 
+  /* Level-specific theme variables (will be updated dynamically) */
+  --color-primary: #C5A059;
+  --color-primary-light: #D4B896;
+  --color-primary-dark: #B8944A;
+  --color-secondary: #93B1A7;
+  --color-accent: #E8D4A8;
+  --color-text-primary: #F5F0E8;
+  --color-text-secondary: #D9D2C4;
+  --color-text-muted: #8A8070;
+  --color-glow: rgba(197, 160, 89, 0.45);
+  --glow-intensity: 0.8;
+
   /* Font Families */
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-serif-alt: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
@@ -377,3 +389,139 @@ h1, h2, h3, h4, h5, h6 {
 
 .font-serif-alt { font-family: var(--font-serif-alt); }
 .font-body { font-family: var(--font-body); }
+
+/* ========================================
+   LEVEL-SPECIFIC THEME UTILITIES
+   ======================================== */
+
+/* Primary color utilities */
+.text-primary { color: var(--color-primary); }
+.bg-primary { background-color: var(--color-primary); }
+.bg-primary-light { background-color: var(--color-primary-light); }
+.border-primary { border-color: var(--color-primary); }
+.border-primary-light { border-color: var(--color-primary-light); }
+
+/* Glow utilities */
+.glow-primary {
+  box-shadow: 0 0 20px var(--color-glow);
+}
+
+.glow-primary-intense {
+  box-shadow:
+    0 0 20px var(--color-glow),
+    0 0 40px var(--color-glow),
+    0 0 60px color-mix(in srgb, var(--color-glow) 50%, transparent);
+}
+
+/* Gradient utilities using theme colors */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary) 100%);
+}
+
+.gradient-theme-card {
+  background: linear-gradient(180deg, var(--color-card) 0%, color-mix(in srgb, var(--color-card) 80%, var(--color-primary) 20%) 100%);
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 50%, var(--color-primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-theme {
+  background: linear-gradient(180deg, var(--color-text-primary) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Level 1: Earthy theme */
+.theme-level-1 {
+  --theme-primary: #8B7355;
+  --theme-primary-glow: rgba(139, 115, 85, 0.3);
+}
+
+/* Level 2: Fresh green theme */
+.theme-level-2 {
+  --theme-primary: #7A9E7E;
+  --theme-primary-glow: rgba(122, 158, 126, 0.35);
+}
+
+/* Level 3: Lotus pink theme */
+.theme-level-3 {
+  --theme-primary: #C4A89C;
+  --theme-primary-glow: rgba(196, 168, 156, 0.4);
+}
+
+/* Level 4: Golden theme */
+.theme-level-4 {
+  --theme-primary: #C5A059;
+  --theme-primary-glow: rgba(197, 160, 89, 0.45);
+}
+
+/* Level 5: Divine gold theme */
+.theme-level-5 {
+  --theme-primary: #D4AF37;
+  --theme-primary-glow: rgba(255, 215, 0, 0.5);
+}
+
+/* Ambient glow animation based on level */
+@keyframes ambient-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--color-glow);
+    opacity: calc(0.5 + var(--glow-intensity, 0.5) * 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--color-glow);
+    opacity: calc(0.7 + var(--glow-intensity, 0.5) * 0.3);
+  }
+}
+
+.animate-ambient-glow {
+  animation: ambient-glow 4s ease-in-out infinite;
+}
+
+/* Particle aura for high-level users */
+@keyframes particle-drift {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: calc(var(--glow-intensity, 0.5) * 0.8);
+  }
+  90% {
+    opacity: calc(var(--glow-intensity, 0.5) * 0.3);
+  }
+  100% {
+    transform: translateY(-100px) translateX(20px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-particle-drift {
+  animation: particle-drift 8s ease-in-out infinite;
+}
+
+/* Level badge with theme color */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  box-shadow: 0 2px 8px var(--color-glow);
+}
+
+.level-badge-glow {
+  box-shadow:
+    0 0 10px var(--color-glow),
+    0 0 20px var(--color-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}

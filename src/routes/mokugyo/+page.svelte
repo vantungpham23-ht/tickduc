@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 	import { supabase } from '$lib/supabase';
+	import { currentTheme } from '$lib/stores/theme';
 
 	let videoElement: HTMLVideoElement | undefined;
 	let canvasElement: HTMLCanvasElement | undefined;
@@ -148,7 +149,7 @@
 		if (!ctx || !results || !canvasElement) return;
 		ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 		if (results.landmarks && results.landmarks.length > 0) {
-			const color = 'rgba(197, 160, 89, 0.5)';
+			const color = `rgba(${parseInt($currentTheme.primary.slice(1,3), 16)}, ${parseInt($currentTheme.primary.slice(3,5), 16)}, ${parseInt($currentTheme.primary.slice(5,7), 16)}, 0.5)`;
 			for (const landmarks of results.landmarks) {
 				const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];
 				ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
@@ -159,7 +160,7 @@
 					ctx.lineTo(e.x * canvasElement.width, e.y * canvasElement.height);
 					ctx.stroke();
 				}
-				ctx.fillStyle = isPinched ? 'rgba(197, 160, 89, 0.9)' : color;
+				ctx.fillStyle = isPinched ? color.replace('0.5', '0.9') : color;
 				ctx.beginPath(); ctx.arc(landmarks[4].x * canvasElement.width, landmarks[4].y * canvasElement.height, 4, 0, 2 * Math.PI); ctx.fill();
 				ctx.beginPath(); ctx.arc(landmarks[8].x * canvasElement.width, landmarks[8].y * canvasElement.height, 4, 0, 2 * Math.PI); ctx.fill();
 			}
@@ -227,7 +228,6 @@
 	function handleRetryCamera() { cameraError = null; startCamera(); }
 
 	function handleScreenTap() {
-		console.log('Screen tap!');
 		if (!audioContext) audioContext = new AudioContext();
 		if (audioContext.state === 'suspended') audioContext.resume();
 		triggerTap();
@@ -249,17 +249,17 @@
 <div class="min-h-screen relative overflow-hidden flex flex-col" onclick={handleScreenTap} role="button" tabindex="0" onkeydown={(e) => e.key === ' ' && handleScreenTap()}>
 	<!-- Ambient backgrounds -->
 	<div class="fixed inset-0 overflow-hidden pointer-events-none">
-		<div class="absolute top-0 right-0 w-96 h-96 bg-[#C5A059]/3 rounded-full blur-3xl animate-float-drift"></div>
-		<div class="absolute bottom-0 left-0 w-64 h-64 bg-[#93B1A7]/2 rounded-full blur-3xl animate-float-drift" style="animation-delay: -4s;"></div>
+		<div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl animate-float-drift" style="background: {$currentTheme.primary}15;"></div>
+		<div class="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl animate-float-drift" style="background: {$currentTheme.secondary}10; animation-delay: -4s;"></div>
 	</div>
 
 	<!-- Header -->
 	<header class="relative z-30 px-4 pt-6 pb-4 flex items-center justify-between">
 		<button onclick={() => goto('/dashboard')} aria-label="Quay về"
-			class="p-2.5 rounded-full bg-[#242018]/80 backdrop-blur-md border border-[#C5A059]/10 hover:border-[#C5A059]/20 transition-colors">
-			<svg class="w-5 h-5 text-[#8A8070]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+			class="p-2.5 rounded-full backdrop-blur-md border transition-colors" style="background: {$currentTheme.bgSurface}CC; border-color: {$currentTheme.primary}10;">
+			<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color: {$currentTheme.textMuted};"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
 		</button>
-		<h1 class="font-serif text-base text-[#F5F0E8]/80 font-light tracking-wide">Gõ Mõ Tích Công Đức</h1>
+		<h1 class="font-serif text-base font-light tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.8;">Gõ Mõ Tích Công Đức</h1>
 		<div class="w-10"></div>
 	</header>
 
@@ -267,22 +267,22 @@
 	<main class="flex-1 flex flex-col items-center justify-center px-6 py-8 relative z-10">
 		<!-- Session Counter -->
 		<div class="text-center mb-8 animate-fade-in-up">
-			<p class="text-[#8A8070]/40 text-sm tracking-wide mb-2 font-light">Hôm nay đã gõ</p>
-			<p class="font-serif text-5xl text-[#F5F0E8] tracking-wide">
-				<span class="text-[#C5A059]/80">{sessionCount % 108}</span> <span class="text-[#8A8070]/20 text-3xl">/</span> <span class="text-[#8A8070]/30 text-3xl">108</span>
+			<p class="text-sm tracking-wide mb-2 font-light" style="color: {$currentTheme.textMuted}; opacity: 0.4;">Hôm nay đã gõ</p>
+			<p class="font-serif text-5xl tracking-wide">
+				<span style="color: {$currentTheme.primary}; opacity: 0.8;">{sessionCount % 108}</span> <span class="text-3xl" style="color: {$currentTheme.textMuted}; opacity: 0.2;">/</span> <span class="text-3xl" style="color: {$currentTheme.textMuted}; opacity: 0.3;">108</span>
 			</p>
-			<p class="text-[#8A8070]/30 text-xs mt-3 font-light tracking-wide">cốc</p>
+			<p class="text-xs mt-3 font-light tracking-wide" style="color: {$currentTheme.textMuted}; opacity: 0.3;">cốc</p>
 		</div>
 
 		<!-- Progress Bar -->
 		<div class="w-full max-w-xs mb-12 animate-fade-in-up" style="animation-delay: 0.1s;">
-			<div class="h-[2px] bg-[#8A8070]/10 rounded-full overflow-hidden">
-				<div class="h-full rounded-full transition-all duration-300 ease-out bg-gradient-to-r from-[#C5A059]/60 to-[#D4B896]/80" style="width: {progressPercent}%;"></div>
+			<div class="h-[2px] rounded-full overflow-hidden" style="background: {$currentTheme.textMuted}10;">
+				<div class="h-full rounded-full transition-all duration-300 ease-out" style="width: {progressPercent}%; background: linear-gradient(to right, {$currentTheme.primary}60, {$currentTheme.primaryLight}80);"></div>
 			</div>
 			{#if remainingTaps > 0 && remainingTaps < 108}
-				<p class="text-center text-[#8A8070]/30 text-xs mt-3 font-light tracking-wide">Còn {remainingTaps} cốc để được +10 công đức</p>
+				<p class="text-center text-xs mt-3 font-light tracking-wide" style="color: {$currentTheme.textMuted}; opacity: 0.3;">Còn {remainingTaps} cốc để được +10 công đức</p>
 			{:else if remainingTaps === 0}
-				<p class="text-center text-[#C5A059]/80 text-xs mt-3 font-light tracking-wide">Hoàn thành 108 cốc — Được +10 công đức!</p>
+				<p class="text-center text-xs mt-3 font-light tracking-wide" style="color: {$currentTheme.primary}; opacity: 0.8;">Hoàn thành 108 cốc — Được +10 công đức!</p>
 			{/if}
 		</div>
 
@@ -290,75 +290,75 @@
 		<div class="relative flex items-center justify-center">
 			{#if showRipple}
 				{#each ripples as ripple (ripple.id)}
-					<div class="absolute w-64 h-64 rounded-full border border-[#C5A059]/20 animate-ripple-out" style="transform: scale({ripple.scale}); opacity: {ripple.opacity};"></div>
+					<div class="absolute w-64 h-64 rounded-full border animate-ripple-out" style="transform: scale({ripple.scale}); opacity: {ripple.opacity}; border-color: {$currentTheme.primary}20;"></div>
 				{/each}
 			{/if}
 
-			<div class="absolute w-48 h-48 rounded-full bg-[#C5A059]/8 blur-3xl transition-opacity duration-300" class:opacity-80={showRipple || isTapping} class:opacity-20={!showRipple && !isTapping}></div>
+			<div class="absolute w-48 h-48 rounded-full blur-3xl transition-opacity duration-300" style="background: {$currentTheme.primary}08; opacity: {(showRipple || isTapping) ? 0.8 : 0.2};"></div>
 
 			<div class="relative transition-transform duration-100" class:scale-105={isTapping} class:scale-100={!isTapping}>
 				<svg viewBox="0 0 200 200" class="w-48 h-48 md:w-56 md:h-56 transition-transform duration-100" class:animate-mokugyo-shake={isTapping}>
 					<defs>
 						<linearGradient id="mokugyoGold" x1="0%" y1="0%" x2="100%" y2="100%">
-							<stop offset="0%" stop-color="#D4B96A"/>
-							<stop offset="50%" stop-color="#C5A059"/>
-							<stop offset="100%" stop-color="#A69050"/>
+							<stop offset="0%" stop-color={$currentTheme.primaryLight}/>
+							<stop offset="50%" stop-color={$currentTheme.primary}/>
+							<stop offset="100%" stop-color={$currentTheme.primaryDark}/>
 						</linearGradient>
 						<filter id="mokugyoShadow" x="-20%" y="-20%" width="140%" height="140%">
-							<feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#C5A059" flood-opacity="0.1"/>
+							<feDropShadow dx="0" dy="4" stdDeviation="8" flood-color={$currentTheme.primary} flood-opacity="0.1"/>
 						</filter>
 					</defs>
 					<ellipse cx="100" cy="105" rx="70" ry="55" fill="url(#mokugyoGold)" filter="url(#mokugyoShadow)"/>
-					<path d="M 45 100 Q 60 95 75 100 Q 90 105 100 100 Q 115 95 130 100 Q 145 105 155 100" fill="none" stroke="#A69050" stroke-width="0.5" opacity="0.3"/>
-					<path d="M 50 115 Q 70 110 90 115 Q 110 120 130 115 Q 145 110 150 115" fill="none" stroke="#A69050" stroke-width="0.5" opacity="0.3"/>
-					<circle cx="70" cy="95" r="6" fill="#242018" opacity="0.6"/>
-					<circle cx="130" cy="95" r="6" fill="#242018" opacity="0.6"/>
-					<circle cx="68" cy="93" r="2" fill="#F5F0E8" opacity="0.3"/>
-					<circle cx="128" cy="93" r="2" fill="#F5F0E8" opacity="0.3"/>
-					<path d="M 85 115 Q 100 125 115 115" fill="none" stroke="#242018" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+					<path d="M 45 100 Q 60 95 75 100 Q 90 105 100 100 Q 115 95 130 100 Q 145 105 155 100" fill="none" stroke={$currentTheme.primaryDark} stroke-width="0.5" opacity="0.3"/>
+					<path d="M 50 115 Q 70 110 90 115 Q 110 120 130 115 Q 145 110 150 115" fill="none" stroke={$currentTheme.primaryDark} stroke-width="0.5" opacity="0.3"/>
+					<circle cx="70" cy="95" r="6" fill={$currentTheme.bgDeep} opacity="0.6"/>
+					<circle cx="130" cy="95" r="6" fill={$currentTheme.bgDeep} opacity="0.6"/>
+					<circle cx="68" cy="93" r="2" fill={$currentTheme.textPrimary} opacity="0.3"/>
+					<circle cx="128" cy="93" r="2" fill={$currentTheme.textPrimary} opacity="0.3"/>
+					<path d="M 85 115 Q 100 125 115 115" fill="none" stroke={$currentTheme.bgDeep} stroke-width="2" stroke-linecap="round" opacity="0.5"/>
 					<ellipse cx="100" cy="55" rx="25" ry="15" fill="url(#mokugyoGold)"/>
-					<ellipse cx="95" cy="50" rx="12" ry="6" fill="#D4B96A" opacity="0.4"/>
-					<ellipse cx="55" cy="100" rx="15" ry="30" fill="#D4B96A" opacity="0.2"/>
+					<ellipse cx="95" cy="50" rx="12" ry="6" fill={$currentTheme.primaryLight} opacity="0.4"/>
+					<ellipse cx="55" cy="100" rx="15" ry="30" fill={$currentTheme.primaryLight} opacity="0.2"/>
 				</svg>
 			</div>
 		</div>
 
 		<!-- Instruction -->
 		<div class="mt-12 text-center animate-fade-in-up" style="animation-delay: 0.2s;">
-			<p class="text-[#8A8070]/40 text-sm tracking-wide font-light">Chạm màn hình để gõ mõ</p>
+			<p class="text-sm tracking-wide font-light" style="color: {$currentTheme.textMuted}; opacity: 0.4;">Chạm màn hình để gõ mõ</p>
 		</div>
 	</main>
 
 	{#if showMeritToast}
 		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in-up">
-			<div class="bg-[#242018] backdrop-blur-2xl border border-[#C5A059]/20 text-[#F5F0E8] px-8 py-5 rounded-2xl shadow-2xl shadow-black/30 text-center">
+			<div class="backdrop-blur-2xl border px-8 py-5 rounded-2xl shadow-2xl text-center" style="background: {$currentTheme.bgDeep}; border-color: {$currentTheme.primary}20; color: {$currentTheme.textPrimary};">
 				<p class="font-serif text-lg tracking-wide mb-1">+10 Công đức</p>
-				<p class="text-[#C5A059]/80 text-sm tracking-wider font-light">Chúc mừng bạn!</p>
+				<p class="text-sm tracking-wider font-light" style="color: {$currentTheme.primary}; opacity: 0.8;">Chúc mừng bạn!</p>
 			</div>
 		</div>
 	{/if}
 
 	{#if isLoading && !cameraError}
-		<div class="absolute inset-0 flex items-center justify-center z-20 bg-[#1A1814]/90 backdrop-blur-sm">
+		<div class="absolute inset-0 flex items-center justify-center z-20 backdrop-blur-sm" style="background: {$currentTheme.bgDeep}F2;">
 			<div class="text-center">
 				<div class="relative w-16 h-16 mx-auto mb-4">
-					<div class="absolute inset-0 rounded-full border border-[#C5A059]/20 animate-ping" style="animation-duration: 3s;"></div>
-					<div class="absolute inset-2 rounded-full border border-[#C5A059]/30 animate-pulse" style="animation-duration: 2s;"></div>
-					<div class="absolute inset-4 rounded-full bg-[#C5A059]/10"></div>
+					<div class="absolute inset-0 rounded-full border animate-ping" style="border-color: {$currentTheme.primary}20; animation-duration: 3s;"></div>
+					<div class="absolute inset-2 rounded-full border animate-pulse" style="border-color: {$currentTheme.primary}30; animation-duration: 2s;"></div>
+					<div class="absolute inset-4 rounded-full" style="background: {$currentTheme.primary}10;"></div>
 				</div>
-				<p class="text-[#8A8070]/40 text-sm tracking-wide font-light">Đang khởi tạo...</p>
+				<p class="text-sm tracking-wide font-light" style="color: {$currentTheme.textMuted}; opacity: 0.4;">Đang khởi tạo...</p>
 			</div>
 		</div>
 	{/if}
 
 	{#if cameraError}
-		<div class="absolute inset-0 flex items-center justify-center z-20 bg-[#1A1814]/95 backdrop-blur-md px-6">
+		<div class="absolute inset-0 flex items-center justify-center z-20 backdrop-blur-md px-6" style="background: {$currentTheme.bgDeep}F2;">
 			<div class="text-center max-w-xs">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full border border-[#C5A059]/15 flex items-center justify-center">
-					<svg class="w-8 h-8 text-[#C5A059]/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full border flex items-center justify-center" style="border-color: {$currentTheme.primary}15;">
+					<svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: {$currentTheme.primary}; opacity: 0.4;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
 				</div>
-				<p class="text-[#F5F0E8]/60 mb-6 text-sm leading-relaxed font-light">{cameraError}</p>
-				<button onclick={handleRetryCamera} class="w-full py-3 bg-[#C5A059]/10 border border-[#C5A059]/20 text-[#C5A059] rounded-full text-sm font-light tracking-wide hover:bg-[#C5A059]/15 transition-colors">Thử lại</button>
+				<p class="mb-6 text-sm leading-relaxed font-light" style="color: {$currentTheme.textPrimary}; opacity: 0.6;">{cameraError}</p>
+				<button onclick={handleRetryCamera} class="w-full py-3 rounded-full text-sm font-light tracking-wide transition-colors" style="background: {$currentTheme.primary}10; border: 1px solid {$currentTheme.primary}20; color: {$currentTheme.primary};">Thử lại</button>
 			</div>
 		</div>
 	{/if}

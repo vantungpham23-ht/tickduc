@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 	import { supabase } from '$lib/supabase';
+	import { currentTheme } from '$lib/stores/theme';
 
 	// State
 	let videoElement: HTMLVideoElement | undefined;
@@ -183,7 +184,7 @@
 		ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
 		if (results.landmarks && results.landmarks.length > 0) {
-			const color = '#93B1A7';
+			const color = `rgba(${parseInt($currentTheme.primary.slice(1,3), 16)}, ${parseInt($currentTheme.primary.slice(3,5), 16)}, ${parseInt($currentTheme.primary.slice(5,7), 16)}, 0.6)`;
 
 			for (const landmarks of results.landmarks) {
 				const connections = [
@@ -529,19 +530,19 @@
 	<!-- Merit Toast -->
 	{#if showMeritToast}
 		<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50" style="animation: fadeInUp 0.8s ease-out forwards;">
-			<div class="bg-[#242018] backdrop-blur-2xl border border-[#C5A059]/20 text-[#F5F0E8] px-8 py-5 rounded-2xl shadow-2xl text-center">
+			<div class="backdrop-blur-2xl border px-8 py-5 rounded-2xl shadow-2xl text-center" style="background: {$currentTheme.bgDeep}; border-color: {$currentTheme.primary}20; color: {$currentTheme.textPrimary};">
 				<p class="font-serif text-xl tracking-wide mb-2">+100 Công đức</p>
-				<p class="text-[#93B1A7] text-sm tracking-wider">Nam mô Quan Thế Âm</p>
+				<p class="text-sm tracking-wider" style="color: {$currentTheme.secondary};">Nam mô Quan Thế Âm</p>
 			</div>
 		</div>
 	{/if}
 
 	<!-- Loading -->
 	{#if isLoading}
-		<div class="absolute inset-0 flex items-center justify-center z-40 bg-[#1A1814]/90">
+		<div class="absolute inset-0 flex items-center justify-center z-40" style="background: {$currentTheme.bgDeep}F2;">
 			<div class="text-center">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full border border-white/20" style="animation: pulse 2s ease-in-out infinite;"></div>
-				<p class="text-white/60 text-sm tracking-wide">Đang khởi tạo camera...</p>
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full border" style="border-color: {$currentTheme.textPrimary}20; animation: pulse 2s ease-in-out infinite;"></div>
+				<p class="text-sm tracking-wide" style="color: {$currentTheme.textMuted}; opacity: 0.6;">Đang khởi tạo camera...</p>
 			</div>
 		</div>
 	{/if}

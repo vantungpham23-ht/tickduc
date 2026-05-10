@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { currentTheme } from '$lib/stores/theme';
 
 	// === VIETNAMESE LUNAR CALENDAR ===
 	// Pre-computed lunar calendar data for accuracy
@@ -223,63 +224,63 @@
 	});
 </script>
 
-<div class="min-h-screen bg-[#1A1814] pb-20">
+<div class="min-h-screen pb-20" style="background-color: var(--color-deep, #1A1814);">
 	<!-- Ambient glow -->
 	<div class="fixed inset-0 pointer-events-none overflow-hidden">
-		<div class="absolute top-0 left-1/4 w-96 h-96 bg-[#C5A059]/5 rounded-full blur-3xl"></div>
-		<div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#93B1A7]/5 rounded-full blur-3xl"></div>
+		<div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: {$currentTheme.primary}05;"></div>
+		<div class="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full blur-3xl" style="background: {$currentTheme.secondary}05;"></div>
 	</div>
 
 	<!-- Header -->
 	<header class="relative px-6 pt-10 pb-6 text-center">
-		<h1 class="font-serif text-2xl text-[#F5F0E8] tracking-[0.3em] uppercase">Kinh Phật</h1>
-		<div class="w-12 h-px bg-[#C5A059]/30 mx-auto mt-3"></div>
+		<h1 class="font-serif text-2xl tracking-[0.3em] uppercase" style="color: {$currentTheme.textPrimary};">Kinh Phật</h1>
+		<div class="w-12 h-px mx-auto mt-3" style="background: {$currentTheme.primary}30;"></div>
 	</header>
 
 	<!-- Zodiac Clock Card -->
 	<div class="px-5 mb-5">
-		<div class="relative bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-3xl p-6 border border-[#C5A059]/10">
+		<div class="relative rounded-3xl p-6 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
 			<!-- Corner ornaments -->
-			<svg class="absolute top-3 left-3 w-6 h-6 text-[#C5A059]/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5">
+			<svg class="absolute top-3 left-3 w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" style="color: {$currentTheme.primary}20;">
 				<path d="M3 3 L12 3 M3 3 L3 12" stroke-linecap="round"/>
 			</svg>
-			<svg class="absolute top-3 right-3 w-6 h-6 text-[#C5A059]/20 rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5">
+			<svg class="absolute top-3 right-3 w-6 h-6 rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" style="color: {$currentTheme.primary}20;">
 				<path d="M3 3 L12 3 M3 3 L3 12" stroke-linecap="round"/>
 			</svg>
 
 			<div class="text-center">
-				<div class="font-serif text-5xl text-[#F5F0E8] tracking-[0.2em] tabular-nums">
+				<div class="font-serif text-5xl tracking-[0.2em] tabular-nums" style="color: {$currentTheme.textPrimary};">
 					{formatTime(currentTime)}
 				</div>
-				<div class="text-[#C5A059]/50 text-[10px] tracking-[0.4em] uppercase mt-1">Giờ Việt Nam</div>
+				<div class="text-xs tracking-[0.4em] uppercase mt-1" style="color: {$currentTheme.primary}; opacity: 0.5;">Giờ Việt Nam</div>
 			</div>
 
 			<!-- Divider -->
 			<div class="flex items-center gap-3 my-5">
-				<div class="flex-1 h-px bg-gradient-to-r from-transparent via-[#C5A059]/15 to-transparent"></div>
-				<svg class="w-3 h-3 text-[#C5A059]/30" viewBox="0 0 24 24" fill="currentColor">
+				<div class="flex-1 h-px" style="background: linear-gradient(to right, transparent, {$currentTheme.primary}15, transparent);"></div>
+				<svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" style="color: {$currentTheme.primary}30;">
 					<circle cx="12" cy="12" r="3"/>
 				</svg>
-				<div class="flex-1 h-px bg-gradient-to-r from-transparent via-[#C5A059]/15 to-transparent"></div>
+				<div class="flex-1 h-px" style="background: linear-gradient(to right, transparent, {$currentTheme.primary}15, transparent);"></div>
 			</div>
 
 			<!-- Solar Date -->
 			<div class="text-center mb-4">
-				<div class="text-[#F5F0E8]/80 text-sm tracking-wide">{formatSolarDate(currentTime)}</div>
+				<div class="text-sm tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.8;">{formatSolarDate(currentTime)}</div>
 				<div class="flex items-center justify-center gap-2 mt-2">
-					<svg class="w-3 h-3 text-[#93B1A7]/50" viewBox="0 0 24 24" fill="currentColor">
+					<svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" style="color: {$currentTheme.secondary}; opacity: 0.5;">
 						<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
 					</svg>
-					<span class="text-[#93B1A7]/60 text-xs tracking-wider">{canChiDay}</span>
+					<span class="text-xs tracking-wider" style="color: {$currentTheme.secondary}; opacity: 0.6;">{canChiDay}</span>
 				</div>
 			</div>
 
 			<!-- Lunar Calendar -->
-			<div class="flex items-center justify-center gap-3 py-3 px-4 bg-[#C5A059]/5 rounded-2xl border border-[#C5A059]/10">
-				<svg class="w-5 h-5 text-[#C5A059]/60 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+			<div class="flex items-center justify-center gap-3 py-3 px-4 rounded-2xl border" style="background: {$currentTheme.primary}05; border-color: {$currentTheme.primary}10;">
+				<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" style="color: {$currentTheme.primary}; opacity: 0.6;">
 					<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
 				</svg>
-				<div class="text-[#F5F0E8]/80 text-sm tracking-wide leading-relaxed">
+				<div class="text-sm tracking-wide leading-relaxed" style="color: {$currentTheme.textPrimary}; opacity: 0.8;">
 					{formatLunarDate(lunarDate)}
 				</div>
 			</div>
@@ -288,7 +289,7 @@
 
 	<!-- Day Quality Card -->
 	<div class="px-5 mb-5">
-		<div class="bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-3xl p-5 border border-[#C5A059]/10">
+		<div class="rounded-3xl p-5 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
 			<div class="flex items-center gap-3 mb-3">
 				<div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: {dayQuality.color}15; border: 1px solid {dayQuality.color}25;">
 					{#if dayQuality.icon === 'star'}
@@ -318,74 +319,74 @@
 					<div class="text-sm font-medium tracking-wide" style="color: {dayQuality.color}">
 						{dayQuality.quality}
 					</div>
-					<div class="text-[#F5F0E8]/30 text-xs">Chiêm tinh ngày hôm nay</div>
+					<div class="text-xs" style="color: {$currentTheme.textPrimary}; opacity: 0.3;">Chiêm tinh ngày hôm nay</div>
 				</div>
 			</div>
-			<p class="text-[#F5F0E8]/40 text-xs leading-relaxed pl-[46px]">{dayQuality.description}</p>
+			<p class="text-xs leading-relaxed pl-[46px]" style="color: {$currentTheme.textPrimary}; opacity: 0.4;">{dayQuality.description}</p>
 		</div>
 	</div>
 
 	<!-- Good Hours -->
 	<div class="px-5 mb-5">
-		<div class="bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-3xl p-5 border border-[#C5A059]/10">
+		<div class="rounded-3xl p-5 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
 			<div class="flex items-center gap-3 mb-4">
-				<svg class="w-4 h-4 text-[#4CAF50]/70 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+				<svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="#4CAF50" style="opacity: 0.7;">
 					<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
 				</svg>
-				<div class="text-[#4CAF50]/80 text-xs font-medium tracking-wider uppercase">Giờ Hoàng Đạo</div>
+				<div class="text-xs font-medium tracking-wider uppercase" style="color: #4CAF50; opacity: 0.8;">Giờ Hoàng Đạo</div>
 			</div>
 			<div class="flex flex-wrap gap-2">
 				{#each goodHours() as hour}
-					<div class="px-3 py-1.5 rounded-full bg-[#4CAF50]/8 border border-[#4CAF50]/20">
-						<span class="text-[#4CAF50]/90 text-xs font-medium">{hour.split(' ')[0]}</span>
+					<div class="px-3 py-1.5 rounded-full border" style="background: rgba(76, 175, 80, 0.08); border-color: rgba(76, 175, 80, 0.2);">
+						<span class="text-xs font-medium" style="color: #4CAF50; opacity: 0.9;">{hour.split(' ')[0]}</span>
 					</div>
 				{/each}
 			</div>
-			<p class="text-[#F5F0E8]/25 text-[10px] mt-3 tracking-wide">Thời gian tốt lành cho việc quan trọng</p>
+			<p class="text-[10px] mt-3 tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.25;">Thời gian tốt lành cho việc quan trọng</p>
 		</div>
 	</div>
 
 	<!-- Bad Hours -->
 	<div class="px-5 mb-5">
-		<div class="bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-3xl p-5 border border-[#C5A059]/10">
+		<div class="rounded-3xl p-5 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
 			<div class="flex items-center gap-3 mb-4">
-				<svg class="w-4 h-4 text-[#E53935]/60 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+				<svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="#E53935" style="opacity: 0.6;">
 					<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
 				</svg>
-				<div class="text-[#E53935]/60 text-xs font-medium tracking-wider uppercase">Giờ Hắc Đạo</div>
+				<div class="text-xs font-medium tracking-wider uppercase" style="color: #E53935; opacity: 0.6;">Giờ Hắc Đạo</div>
 			</div>
 			<div class="flex flex-wrap gap-2">
 				{#each VIETNAMESE_HOURS.filter(h => !goodHours().some(g => g.split(' ')[0] === h.split(' ')[0])).slice(0, 6) as hour}
-					<div class="px-3 py-1.5 rounded-full bg-[#E53935]/8 border border-[#E53935]/20">
-						<span class="text-[#E53935]/60 text-xs">{hour.split(' ')[0]}</span>
+					<div class="px-3 py-1.5 rounded-full border" style="background: rgba(229, 57, 53, 0.08); border-color: rgba(229, 57, 53, 0.2);">
+						<span class="text-xs" style="color: #E53935; opacity: 0.6;">{hour.split(' ')[0]}</span>
 					</div>
 				{/each}
 			</div>
-			<p class="text-[#F5F0E8]/25 text-[10px] mt-3 tracking-wide">Nên tránh giờ này cho việc lớn</p>
+			<p class="text-[10px] mt-3 tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.25;">Nên tránh giờ này cho việc lớn</p>
 		</div>
 	</div>
 
 	<!-- Current Hour -->
 	<div class="px-5 mb-5">
-		<div class="relative bg-gradient-to-br from-[#C5A059]/8 to-[#C5A059]/3 rounded-3xl p-5 border border-[#C5A059]/15">
-			<div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-[#1A1814] border border-[#C5A059]/20 rounded-full">
-				<span class="text-[#C5A059]/50 text-[9px] tracking-[0.3em] uppercase">Hiện Tại</span>
+		<div class="relative rounded-3xl p-5 border" style="background: linear-gradient(to bottom right, {$currentTheme.primary}08, {$currentTheme.primary}03); border-color: {$currentTheme.primary}15;">
+			<div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full border" style="background: {$currentTheme.bgDeep}; border-color: {$currentTheme.primary}20;">
+				<span class="text-[9px] tracking-[0.3em] uppercase" style="color: {$currentTheme.primary}; opacity: 0.5;">Hiện Tại</span>
 			</div>
 			<div class="text-center pt-2">
-				<div class="text-[#F5F0E8]/90 text-lg font-light tracking-wide">{currentHourName}</div>
+				<div class="text-lg font-light tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.9;">{currentHourName}</div>
 				{#if HOANG_DAO_HOURS.includes(currentHourName.split(' ')[0])}
 					<div class="flex items-center justify-center gap-2 mt-2">
-						<svg class="w-4 h-4 text-[#4CAF50]/50" viewBox="0 0 24 24" fill="currentColor">
+						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="#4CAF50" style="opacity: 0.5;">
 							<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
 						</svg>
-						<span class="text-[#4CAF50]/50 text-xs">Đang trong giờ hoàng đạo</span>
+						<span class="text-xs" style="color: #4CAF50; opacity: 0.5;">Đang trong giờ hoàng đạo</span>
 					</div>
 				{:else}
 					<div class="flex items-center justify-center gap-2 mt-2">
-						<svg class="w-4 h-4 text-[#E53935]/30" viewBox="0 0 24 24" fill="currentColor">
+						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="#E53935" style="opacity: 0.3;">
 							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
 						</svg>
-						<span class="text-[#E53935]/30 text-xs">Đang trong giờ hắc đạo</span>
+						<span class="text-xs" style="color: #E53935; opacity: 0.3;">Đang trong giờ hắc đạo</span>
 					</div>
 				{/if}
 			</div>
@@ -395,42 +396,42 @@
 	<!-- Year Info -->
 	<div class="px-5 mb-5">
 		<div class="grid grid-cols-2 gap-3">
-			<div class="bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-2xl p-4 border border-[#C5A059]/10">
+			<div class="rounded-2xl p-4 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
 				<div class="flex items-center gap-2 mb-2">
-					<svg class="w-4 h-4 text-[#C5A059]/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: {$currentTheme.primary}; opacity: 0.4;">
 						<circle cx="12" cy="12" r="10"/>
 						<path d="M12 6v6l4 2"/>
 					</svg>
-					<span class="text-[#C5A059]/40 text-[9px] uppercase tracking-widest">Năm {currentTime.getFullYear()}</span>
+					<span class="text-[9px] uppercase tracking-widest" style="color: {$currentTheme.primary}; opacity: 0.4;">Năm {currentTime.getFullYear()}</span>
 				</div>
-				<div class="text-[#F5F0E8]/70 text-sm font-light tracking-wide">{canChiYear}</div>
+				<div class="text-sm font-light tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.7;">{canChiYear}</div>
 			</div>
-			<div class="bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-2xl p-4 border border-[#C5A059]/10">
+			<div class="rounded-2xl p-4 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
 				<div class="flex items-center gap-2 mb-2">
-					<svg class="w-4 h-4 text-[#93B1A7]/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: {$currentTheme.secondary}; opacity: 0.4;">
 						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
 					</svg>
-					<span class="text-[#93B1A7]/40 text-[9px] uppercase tracking-widest">Tuổi năm</span>
+					<span class="text-[9px] uppercase tracking-widest" style="color: {$currentTheme.secondary}; opacity: 0.4;">Tuổi năm</span>
 				</div>
-				<div class="text-[#F5F0E8]/70 text-sm font-light tracking-wide">{ZODIAC_ANIMALS[(currentTime.getFullYear() - 4) % 12]}</div>
+				<div class="text-sm font-light tracking-wide" style="color: {$currentTheme.textPrimary}; opacity: 0.7;">{ZODIAC_ANIMALS[(currentTime.getFullYear() - 4) % 12]}</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Daily Quote -->
 	<div class="px-5 mb-5">
-		<div class="relative bg-gradient-to-br from-[#2A2520] to-[#1E1A16] rounded-3xl p-6 border border-[#C5A059]/10">
-			<svg class="absolute top-4 left-5 w-7 h-7 text-[#C5A059]/8" viewBox="0 0 24 24" fill="currentColor">
+		<div class="relative rounded-3xl p-6 border" style="background: linear-gradient(to bottom right, {$currentTheme.bgCard}, {$currentTheme.bgDeep}); border-color: {$currentTheme.primary}10;">
+			<svg class="absolute top-4 left-5 w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style="color: {$currentTheme.primary}; opacity: 0.08;">
 				<path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
 			</svg>
 
 			<div class="pt-5 pl-4">
-				<p class="text-[#F5F0E8]/60 text-sm leading-relaxed italic font-light">
+				<p class="text-sm leading-relaxed italic font-light" style="color: {$currentTheme.textPrimary}; opacity: 0.6;">
 					"{quote.text}"
 				</p>
 				<div class="flex items-center gap-3 mt-5">
-					<div class="w-8 h-px bg-gradient-to-r from-[#C5A059]/30 to-transparent"></div>
-					<span class="text-[#C5A059]/50 text-[10px] tracking-[0.25em] uppercase">{quote.source}</span>
+					<div class="w-8 h-px" style="background: linear-gradient(to right, {$currentTheme.primary}30, transparent);"></div>
+					<span class="text-[10px] tracking-[0.25em] uppercase" style="color: {$currentTheme.primary}; opacity: 0.5;">{quote.source}</span>
 				</div>
 			</div>
 		</div>

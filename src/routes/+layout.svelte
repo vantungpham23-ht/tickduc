@@ -1,6 +1,12 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import LevelUpNotification from '$lib/components/LevelUpNotification.svelte';
+	import { initializeTheme, currentTheme, applyThemeToCSS, currentLevel } from '$lib/stores/theme';
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import { getLevelInfo } from '$lib/components/levels';
 
 	let { children } = $props();
 
@@ -17,6 +23,31 @@
 			});
 		});
 	});
+
+	// Initialize theme on mount
+	onMount(async () => {
+		// First set default theme
+		initializeTheme(1);
+
+		// Then try to get user level from localStorage or session
+		try {
+			const isGuest = localStorage.getItem('isGuest') === 'true';
+			if (isGuest) {
+				const meritPoints = parseInt(localStorage.getItem('guestMerit') || '0');
+				const level = getLevelInfo(meritPoints).level;
+				initializeTheme(level);
+			}
+		} catch (e) {
+			console.log('Could not load user theme');
+		}
+	});
+
+	// Apply theme whenever it changes
+	$effect(() => {
+		if (browser && $currentTheme) {
+			applyThemeToCSS($currentTheme);
+		}
+	});
 </script>
 
 <svelte:head>
@@ -26,7 +57,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 </svelte:head>
 
-<div class="min-h-screen bg-[#1A1814]">
+<!-- Level-up notification overlay -->
+<LevelUpNotification />
+
+<div class="min-h-screen" style="background-color: var(--color-deep, #1A1814);">
 	{@render children()}
 </div>
 
