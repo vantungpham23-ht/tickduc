@@ -50,20 +50,20 @@
 
 <div class="min-h-screen pb-20 relative overflow-hidden">
 	<div class="fixed inset-0 overflow-hidden pointer-events-none">
-		<div class="absolute top-0 right-0 w-80 h-80 bg-[#C5A059]/3 rounded-full blur-3xl"></div>
-		<div class="absolute bottom-0 left-0 w-64 h-64 bg-[#93B1A7]/2 rounded-full blur-3xl"></div>
+		<div class="absolute top-0 right-0 w-80 h-80 bg-[#C5A059]/8 rounded-full blur-3xl"></div>
+		<div class="absolute bottom-0 left-0 w-64 h-64 bg-[#93B1A7]/8 rounded-full blur-3xl"></div>
 	</div>
 
 	<header class="relative px-6 pt-8 pb-4 text-center z-10">
-		<h1 class="font-serif text-2xl font-light text-[#F5F0E8] tracking-wide">Hướng dẫn</h1>
-		<p class="text-[#8A8070] text-sm mt-1 font-light">Hành trình tích công đức</p>
+		<h1 class="font-serif text-2xl font-light text-[#4A3F35] tracking-wide">Hướng dẫn</h1>
+		<p class="text-[#9A8E80] text-sm mt-1 font-light">Hành trình tích công đức</p>
 	</header>
 
 	<div class="px-6 mb-4 z-10 relative">
-		<div class="flex bg-[#242018] rounded-2xl p-1 border border-[#C5A059]/8">
+		<div class="flex bg-white rounded-2xl p-1 border border-[#E5DDD0]">
 			{#each Object.entries(guides) as [key, guide]}
 				<button onclick={() => selectMode(key as GuideMode)}
-					class="flex-1 py-2.5 px-3 rounded-xl text-xs font-light transition-all duration-300 {activeMode === key ? 'text-[#F5F0E8] bg-[#C5A059]/10' : 'text-[#8A8070]/40'}">
+					class="flex-1 py-2.5 px-3 rounded-xl text-xs font-light transition-all duration-300 {activeMode === key ? 'text-white bg-[#C5A059]' : 'text-[#9A8E80] hover:text-[#6B5D4D]'}">
 					{guide.title}
 				</button>
 			{/each}
@@ -74,22 +74,22 @@
 		<div class="flex items-center justify-center gap-1.5">
 			{#each currentGuide.steps as _, i}
 				<button onclick={() => currentStep = i}
-					class="h-[2px] rounded-full transition-all duration-500 {i <= currentStep ? 'w-6 bg-[#C5A059]/50' : 'w-2 bg-[#8A8070]/10'}">
+					class="h-[2px] rounded-full transition-all duration-500 {i <= currentStep ? 'w-6 bg-[#C5A059]/60' : 'w-2 bg-[#E5DDD0]'}">
 				</button>
 			{/each}
 		</div>
 	</div>
 
 	<div class="px-6 z-10 relative">
-		<div class="rounded-3xl p-6 mb-6 bg-[#242018]/80 border border-[#C5A059]/8">
+		<div class="rounded-3xl p-6 mb-6 bg-white border border-[#E5DDD0]">
 			<div class="flex items-center justify-center gap-2 mb-4">
 				<span class="text-xs font-light tracking-wider" style="color: {currentGuide.color}">Bước {currentGuide.steps[currentStep].title ? currentStep + 1 : ''}</span>
-				<span class="text-[#8A8070]/20">•</span>
-				<span class="text-[#8A8070]/40 text-xs">{currentStep + 1}/{currentGuide.steps.length}</span>
+				<span class="text-[#E5DDD0]">•</span>
+				<span class="text-[#9A8E80]/60 text-xs">{currentStep + 1}/{currentGuide.steps.length}</span>
 			</div>
 
-			<h2 class="font-serif text-xl text-[#F5F0E8] text-center mb-3 font-light">{currentGuide.steps[currentStep].title}</h2>
-			<p class="text-[#8A8070] text-sm text-center leading-relaxed font-light">{currentGuide.steps[currentStep].description}</p>
+			<h2 class="font-serif text-xl text-[#4A3F35] text-center mb-3 font-light">{currentGuide.steps[currentStep].title}</h2>
+			<p class="text-[#6B5D4D] text-sm text-center leading-relaxed font-light">{currentGuide.steps[currentStep].description}</p>
 
 			<div class="mt-4 px-4 py-3 rounded-xl bg-[#C5A059]/5 border border-[#C5A059]/10">
 				<p class="text-xs text-center" style="color: {currentGuide.color}">{currentGuide.steps[currentStep].tip}</p>
@@ -98,18 +98,18 @@
 
 		<div class="flex gap-3">
 			<button onclick={() => currentStep > 0 ? currentStep-- : goto('/dashboard')}
-				class="flex-1 py-3 px-4 rounded-xl bg-[#242018] border border-[#8A8070]/10 text-[#8A8070] text-sm font-light">
+				class="flex-1 py-3 px-4 rounded-xl bg-white border border-[#E5DDD0] text-[#9A8E80] text-sm font-light hover:border-[#C5A059]/30 transition-colors">
 				{currentStep > 0 ? 'Quay lại' : 'Đóng'}
 			</button>
 			<button onclick={() => currentStep < currentGuide.steps.length - 1 ? currentStep++ : goToPractice()}
 				class="flex-1 py-3 px-4 rounded-xl text-sm font-light transition-colors"
-				style="background: {currentGuide.color}20; color: {currentGuide.color}; border: 1px solid {currentGuide.color}20;">
+				style="background: {currentGuide.color}20; color: {currentGuide.color}; border: 1px solid {currentGuide.color}30;">
 				{currentStep < currentGuide.steps.length - 1 ? 'Tiếp tục' : 'Bắt đầu'}
 			</button>
 		</div>
 
-		<div class="mt-6 rounded-2xl p-5 text-center bg-[#242018]/60 border border-[#C5A059]/5">
-			<p class="text-[#8A8070]/40 text-sm font-light">{currentGuide.title} • {currentGuide.subtitle}</p>
+		<div class="mt-6 rounded-2xl p-5 text-center bg-[#FAF7F2] border border-[#E5DDD0]">
+			<p class="text-[#9A8E80]/60 text-sm font-light">{currentGuide.title} • {currentGuide.subtitle}</p>
 		</div>
 	</div>
 </div>

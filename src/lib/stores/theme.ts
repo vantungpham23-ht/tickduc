@@ -73,12 +73,11 @@ export function applyThemeToCSS(theme: LevelTheme) {
 	root.style.setProperty('--color-secondary', theme.secondary);
 	root.style.setProperty('--color-accent', theme.accent);
 
-	root.style.setProperty('--color-void', theme.bgVoid);
-	root.style.setProperty('--color-night', theme.bgNight);
-	root.style.setProperty('--color-deep', theme.bgDeep);
-	root.style.setProperty('--color-surface', theme.bgSurface);
-	root.style.setProperty('--color-card', theme.bgCard);
-	root.style.setProperty('--color-elevated', theme.bgElevated);
+	root.style.setProperty('--color-bg-primary', theme.bgDeep);
+	root.style.setProperty('--color-bg-secondary', theme.bgSurface);
+	root.style.setProperty('--color-bg-card', theme.bgCard);
+	root.style.setProperty('--color-bg-elevated', theme.bgElevated);
+	root.style.setProperty('--color-bg-surface', theme.bgSurface);
 
 	root.style.setProperty('--color-text-primary', theme.textPrimary);
 	root.style.setProperty('--color-text-secondary', theme.textSecondary);
@@ -87,15 +86,15 @@ export function applyThemeToCSS(theme: LevelTheme) {
 	root.style.setProperty('--color-glow', theme.glow);
 	root.style.setProperty('--glow-intensity', theme.glowIntensity.toString());
 
-	// Update background color
+	// Update background color for body
 	root.style.setProperty('background-color', theme.bgDeep);
 
 	// Update selection color
-	root.style.setProperty('--selection-bg', `${theme.primary}40`);
+	root.style.setProperty('--selection-bg', `${theme.primary}33`);
 
 	// Update border colors
-	root.style.setProperty('--border-gold-subtle', `${theme.primary}26`);
-	root.style.setProperty('--border-gold-muted', `${theme.primary}4D`);
+	root.style.setProperty('--border-gold-subtle', `${theme.primary}33`);
+	root.style.setProperty('--border-gold-muted', `${theme.primary}59`);
 }
 
 // Get theme for a specific level

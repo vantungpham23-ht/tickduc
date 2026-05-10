@@ -224,7 +224,7 @@
 	});
 </script>
 
-<div class="min-h-screen pb-20" style="background-color: var(--color-deep, #1A1814);">
+<div class="min-h-screen pb-20" style="background-color: var(--color-bg-primary, #FAF7F2);">
 	<!-- Ambient glow -->
 	<div class="fixed inset-0 pointer-events-none overflow-hidden">
 		<div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: {$currentTheme.primary}05;"></div>

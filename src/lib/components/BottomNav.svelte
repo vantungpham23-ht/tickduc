@@ -20,7 +20,7 @@
 
 	<div
 		class="relative backdrop-blur-2xl border-t px-4 pt-2 pb-6"
-		style="background: rgba(18, 17, 14, 0.9); border-color: {$currentTheme.primary}14;"
+		style="background: rgba(250, 247, 242, 0.92); border-color: {$currentTheme.primary}15;"
 	>
 		<div class="flex items-center justify-around max-w-md mx-auto">
 			{#each navItems as item}

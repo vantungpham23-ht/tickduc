@@ -60,7 +60,7 @@
 <!-- Level-up notification overlay -->
 <LevelUpNotification />
 
-<div class="min-h-screen" style="background-color: var(--color-deep, #1A1814);">
+<div class="min-h-screen" style="background-color: var(--color-bg-primary, #FAF7F2);">
 	{@render children()}
 </div>
 
@@ -71,7 +71,7 @@
 
 	:global(body) {
 		font-family: 'Inter', system-ui, sans-serif;
-		background-color: #F7F3F0;
+		background-color: #FAF7F2;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	}

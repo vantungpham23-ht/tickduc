@@ -38,17 +38,17 @@
 <div class="min-h-screen relative overflow-hidden">
 	<!-- Ambient -->
 	<div class="fixed inset-0 overflow-hidden pointer-events-none">
-		<div class="absolute top-0 right-0 w-96 h-96 bg-[#C5A059]/3 rounded-full blur-3xl animate-float-drift"></div>
-		<div class="absolute bottom-0 left-0 w-64 h-64 bg-[#93B1A7]/2 rounded-full blur-3xl animate-float-drift" style="animation-delay: -4s;"></div>
+		<div class="absolute top-0 right-0 w-96 h-96 bg-[#C5A059]/5 rounded-full blur-3xl animate-float-drift"></div>
+		<div class="absolute bottom-0 left-0 w-64 h-64 bg-[#93B1A7]/5 rounded-full blur-3xl animate-float-drift" style="animation-delay: -4s;"></div>
 	</div>
 
 	<div class="fixed top-6 right-6 z-20">
-		<button onclick={() => { localStorage.setItem('hasOnboarded', 'true'); goto('/auth'); }} class="text-[#8A8070]/40 hover:text-[#8A8070]/70 text-xs tracking-wider transition-colors">Bỏ qua</button>
+		<button onclick={() => { localStorage.setItem('hasOnboarded', 'true'); goto('/auth'); }} class="text-[#9A8E80]/50 hover:text-[#9A8E80]/80 text-xs tracking-wider transition-colors">Bỏ qua</button>
 	</div>
 
 	<div class="fixed top-5 left-5 z-20">
-		<button onclick={prevStep} class="p-2 rounded-full hover:bg-white/5 transition-colors">
-			<svg class="w-5 h-5 text-[#8A8070]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+		<button onclick={prevStep} class="p-2 rounded-full hover:bg-[#C5A059]/5 transition-colors">
+			<svg class="w-5 h-5 text-[#9A8E80]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
 		</button>
 	</div>
 
@@ -58,7 +58,7 @@
 			<div class="mb-12">
 				{#if currentData.icon === 'lotus'}
 					<div class="w-28 h-28 mx-auto animate-gentle-glow">
-						<svg class="w-full h-full text-[#C5A059]/50" viewBox="0 0 80 80" fill="none">
+						<svg class="w-full h-full text-[#C5A059]/60" viewBox="0 0 80 80" fill="none">
 							<ellipse cx="40" cy="22" rx="8" ry="16" fill="currentColor" opacity="0.5" transform="rotate(0 40 48)"/>
 							<ellipse cx="40" cy="22" rx="8" ry="16" fill="currentColor" opacity="0.5" transform="rotate(60 40 48)"/>
 							<ellipse cx="40" cy="22" rx="8" ry="16" fill="currentColor" opacity="0.5" transform="rotate(120 40 48)"/>
@@ -70,7 +70,7 @@
 					</div>
 				{:else if currentData.icon === 'lotus-seated'}
 					<div class="w-28 h-28 mx-auto">
-						<svg class="w-full h-full text-[#93B1A7]/50" viewBox="0 0 80 80" fill="none">
+						<svg class="w-full h-full text-[#93B1A7]/60" viewBox="0 0 80 80" fill="none">
 							<ellipse cx="40" cy="65" rx="20" ry="6" fill="currentColor" opacity="0.15"/>
 							<path d="M40 60 C30 60 25 55 25 50 C25 45 30 40 40 40 C50 40 55 45 55 50 C55 55 50 60 40 60" fill="currentColor" opacity="0.25"/>
 							<circle cx="40" cy="30" r="8" fill="currentColor" opacity="0.3"/>
@@ -79,7 +79,7 @@
 					</div>
 				{:else if currentData.icon === 'mokugyo'}
 					<div class="w-28 h-28 mx-auto">
-						<svg class="w-full h-full text-[#C5A059]/50" viewBox="0 0 80 80" fill="none">
+						<svg class="w-full h-full text-[#C5A059]/60" viewBox="0 0 80 80" fill="none">
 							<ellipse cx="40" cy="55" rx="18" ry="10" fill="currentColor" opacity="0.3"/>
 							<ellipse cx="40" cy="50" rx="18" ry="10" fill="currentColor" opacity="0.5"/>
 							<ellipse cx="40" cy="50" rx="14" ry="7" fill="currentColor" opacity="0.2"/>
@@ -89,7 +89,7 @@
 					</div>
 				{:else}
 					<div class="w-28 h-28 mx-auto">
-						<svg class="w-full h-full text-[#93B1A7]/50" viewBox="0 0 80 80" fill="none">
+						<svg class="w-full h-full text-[#93B1A7]/60" viewBox="0 0 80 80" fill="none">
 							<circle cx="40" cy="22" r="6" fill="currentColor" opacity="0.4"/>
 							<path d="M28 55 C28 48 33 42 40 42 C47 42 52 48 52 55" fill="currentColor" opacity="0.25"/>
 							<ellipse cx="40" cy="62" rx="10" ry="4" fill="currentColor" opacity="0.15"/>
@@ -105,22 +105,22 @@
 			<!-- Step dots -->
 			<div class="flex justify-center gap-2 mb-10">
 				{#each steps as _, i}
-					<div class="h-[2px] rounded-full transition-all duration-500 {i === currentStep ? 'w-8 bg-[#C5A059]/60' : i < currentStep ? 'w-2 bg-[#C5A059]/30' : 'w-2 bg-[#8A8070]/10'}"></div>
+					<div class="h-[2px] rounded-full transition-all duration-500 {i === currentStep ? 'w-8 bg-[#C5A059]/60' : i < currentStep ? 'w-2 bg-[#C5A059]/40' : 'w-2 bg-[#9A8E80]/20'}"></div>
 				{/each}
 			</div>
 
-			<h1 class="font-serif text-3xl font-light text-[#F5F0E8] mb-2 tracking-wide animate-fade-in-up">{currentData.title}</h1>
-			<p class="text-[#C5A059]/60 text-sm tracking-widest mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">{currentData.subtitle}</p>
-			<p class="text-[#8A8070] text-sm leading-relaxed font-light animate-fade-in-up" style="animation-delay: 0.2s;">{currentData.description}</p>
+			<h1 class="font-serif text-3xl font-light text-[#4A3F35] mb-2 tracking-wide animate-fade-in-up">{currentData.title}</h1>
+			<p class="text-[#C5A059]/80 text-sm tracking-widest mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">{currentData.subtitle}</p>
+			<p class="text-[#6B5D4D] text-sm leading-relaxed font-light animate-fade-in-up" style="animation-delay: 0.2s;">{currentData.description}</p>
 		</div>
 	</main>
 
 	<footer class="px-8 py-10 relative z-10">
-		<button onclick={nextStep} class="w-full py-4 bg-[#C5A059]/15 border border-[#C5A059]/25 text-[#D4B896] rounded-2xl font-light text-base tracking-wide transition-all duration-300 hover:bg-[#C5A059]/22 hover:border-[#C5A059]/35 active:scale-[0.98]">
+		<button onclick={nextStep} class="w-full py-4 bg-[#C5A059]/10 border border-[#C5A059]/25 text-[#8B6840] rounded-2xl font-light text-base tracking-wide transition-all duration-300 hover:bg-[#C5A059]/18 hover:border-[#C5A059]/35 active:scale-[0.98]">
 			{currentStep === steps.length - 1 ? 'Bắt đầu hành trình' : 'Tiếp tục'}
 		</button>
 		{#if currentStep === 0}
-			<p class="text-center text-[#8A8070]/15 text-xs italic font-serif-alt mt-8 animate-fade-in" style="animation-delay: 0.5s;">"Những điều tốt đẹp nhất trong cuộc sống là những điều chúng ta không thể thấy bằng mắt"</p>
+			<p class="text-center text-[#9A8E80]/40 text-xs italic font-serif-alt mt-8 animate-fade-in" style="animation-delay: 0.5s;">"Những điều tốt đẹp nhất trong cuộc sống là những điều chúng ta không thể thấy bằng mắt"</p>
 		{/if}
 	</footer>
 </div>
