@@ -8,120 +8,108 @@ export interface LevelInfo {
 	description: string;
 }
 
-// Theme colors for each level - LIGHT LUXURY PALETTE
+// Theme colors for each level - MODERN LIGHT PALETTE
 export interface LevelTheme {
 	primary: string;
 	primaryLight: string;
 	primaryDark: string;
 	secondary: string;
 	accent: string;
-	bgVoid: string;
-	bgNight: string;
-	bgDeep: string;
-	bgSurface: string;
+	bgPrimary: string;
+	bgSecondary: string;
 	bgCard: string;
-	bgElevated: string;
+	bgSurface: string;
 	textPrimary: string;
 	textSecondary: string;
 	textMuted: string;
 	glow: string;
-	glowIntensity: number; // 0-1, affects animation intensity
+	glowIntensity: number;
 }
 
 export const LEVEL_THEMES: Record<number, LevelTheme> = {
 	1: {
-		// Level 1: Hạt Giống Bồ Đề - Warm Earth, natural, beginning
-		primary: '#A07850',       // Warm brown
-		primaryLight: '#C4A078',
-		primaryDark: '#8B6840',
-		secondary: '#93B1A7',     // Sage green
-		accent: '#C4A89C',        // Soft rose
-		bgVoid: '#FAF7F2',
-		bgNight: '#F5F0E8',
-		bgDeep: '#EDE6DA',
-		bgSurface: '#E5DDD0',
+		// Level 1: Hạt Giống Bồ Đề - Warm Earth
+		primary: '#8B7355',
+		primaryLight: '#A89078',
+		primaryDark: '#6B5744',
+		secondary: '#93B1A7',
+		accent: '#8B7355',
+		bgPrimary: '#F9F8F6',
+		bgSecondary: '#F5F4F2',
 		bgCard: '#FFFFFF',
-		bgElevated: '#FFFFFF',
-		textPrimary: '#2E2520',
-		textSecondary: '#6B5D4D',
-		textMuted: '#9A8E80',
-		glow: 'rgba(160, 120, 80, 0.2)',
+		bgSurface: '#F0EFEC',
+		textPrimary: '#1A1918',
+		textSecondary: '#4A4543',
+		textMuted: '#7A7573',
+		glow: 'rgba(139, 115, 85, 0.15)',
 		glowIntensity: 0.3
 	},
 	2: {
-		// Level 2: Mầm Sen Non - Fresh Sage, growing, hopeful
-		primary: '#7A9E7E',       // Fresh sage green
-		primaryLight: '#A8C0A8',
-		primaryDark: '#5E8062',
-		secondary: '#93B1A7',     // Sage
-		accent: '#C4D4C8',        // Light sage
-		bgVoid: '#F7FAF8',
-		bgNight: '#F0F5F2',
-		bgDeep: '#E8F0EC',
-		bgSurface: '#DCE8E2',
+		// Level 2: Mầm Sen Non - Fresh Sage
+		primary: '#6B8E6B',
+		primaryLight: '#8FBC8F',
+		primaryDark: '#4A6B4A',
+		secondary: '#93B1A7',
+		accent: '#6B8E6B',
+		bgPrimary: '#F9FAF9',
+		bgSecondary: '#F5F7F5',
 		bgCard: '#FFFFFF',
-		bgElevated: '#FFFFFF',
-		textPrimary: '#2E3530',
-		textSecondary: '#5A6B60',
-		textMuted: '#8A9E90',
-		glow: 'rgba(122, 158, 126, 0.2)',
+		bgSurface: '#EEF2EF',
+		textPrimary: '#1A1918',
+		textSecondary: '#3A4543',
+		textMuted: '#6A7573',
+		glow: 'rgba(107, 142, 107, 0.15)',
 		glowIntensity: 0.45
 	},
 	3: {
-		// Level 3: Hoa Sen Chớm Nở - Soft Rose, blooming, elegant
-		primary: '#C4A89C',       // Lotus rose
-		primaryLight: '#D9C4BC',
-		primaryDark: '#A89080',
-		secondary: '#E8D4C8',     // Soft cream
-		accent: '#F5E6DC',        // Light pink
-		bgVoid: '#FAF7F5',
-		bgNight: '#F5F0EC',
-		bgDeep: '#EDE8E2',
-		bgSurface: '#E5DDD6',
+		// Level 3: Hoa Sen Chớm Nở - Soft Rose
+		primary: '#BC8F8F',
+		primaryLight: '#D4A8A8',
+		primaryDark: '#A07070',
+		secondary: '#E8D4C8',
+		accent: '#BC8F8F',
+		bgPrimary: '#FAF8F7',
+		bgSecondary: '#F7F4F3',
 		bgCard: '#FFFFFF',
-		bgElevated: '#FFFFFF',
-		textPrimary: '#2E2522',
-		textSecondary: '#6B5D52',
-		textMuted: '#9A8E85',
-		glow: 'rgba(196, 168, 156, 0.25)',
+		bgSurface: '#F2EFEE',
+		textPrimary: '#1A1918',
+		textSecondary: '#4A4543',
+		textMuted: '#7A7573',
+		glow: 'rgba(188, 143, 143, 0.2)',
 		glowIntensity: 0.6
 	},
 	4: {
-		// Level 4: Hoa Sen Vàng Kim - Golden Honey, radiant, luxurious
-		primary: '#C5A059',       // Golden honey
-		primaryLight: '#E8D4A8',
-		primaryDark: '#B8944A',
-		secondary: '#D4B896',    // Champagne
-		accent: '#F5E6C4',        // Pale gold
-		bgVoid: '#FAF8F2',
-		bgNight: '#F5F2E8',
-		bgDeep: '#F0EBD8',
-		bgSurface: '#E8E0CC',
+		// Level 4: Hoa Sen Vàng Kim - Golden Honey
+		primary: '#B8860B',
+		primaryLight: '#DAA520',
+		primaryDark: '#8B6508',
+		secondary: '#F5E6C4',
+		accent: '#B8860B',
+		bgPrimary: '#FDFBF5',
+		bgSecondary: '#FAF6E8',
 		bgCard: '#FFFFFF',
-		bgElevated: '#FFFFFF',
-		textPrimary: '#2E2820',
-		textSecondary: '#6B5D40',
-		textMuted: '#9A8E70',
-		glow: 'rgba(197, 160, 89, 0.25)',
+		bgSurface: '#F5EFDC',
+		textPrimary: '#1A1918',
+		textSecondary: '#4A4520',
+		textMuted: '#7A7560',
+		glow: 'rgba(184, 134, 11, 0.15)',
 		glowIntensity: 0.8
 	},
 	5: {
-		// Level 5: Tòa Sen Tỏa Sáng - Divine Gold, transcendent, enlightened
-		primary: '#B8944A',       // Divine warm gold
-		primaryLight: '#E8D4A8',
-		primaryDark: '#9A7830',
-		secondary: '#D4B896',     // Champagne
-		accent: '#F5E6C4',        // Pale gold
-		bgVoid: '#FDFBF5',
-		bgNight: '#FAF6EC',
-		bgDeep: '#F8F2E0',
-		bgSurface: '#F0E8D0',
+		// Level 5: Tòa Sen Tỏa Sáng - Divine Gold
+		primary: '#8B7500',
+		primaryLight: '#B8860B',
+		primaryDark: '#6B5500',
+		secondary: '#F5E6A0',
+		accent: '#8B7500',
+		bgPrimary: '#FDFAF0',
+		bgSecondary: '#FAF5E0',
 		bgCard: '#FFFFFF',
-		bgElevated: '#FFFFFF',
-		textPrimary: '#28220A',
-		textSecondary: '#5A5020',
-		textMuted: '#8A8060',
-		glow: 'rgba(184, 148, 74, 0.3)',
+		bgSurface: '#F5EDD0',
+		textPrimary: '#1A1508',
+		textSecondary: '#4A4500',
+		textMuted: '#7A7540',
+		glow: 'rgba(184, 134, 11, 0.2)',
 		glowIntensity: 1.0
 	}
 };

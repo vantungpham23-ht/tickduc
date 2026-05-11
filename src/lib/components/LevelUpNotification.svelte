@@ -98,13 +98,12 @@
 			style="
 				background: linear-gradient(145deg,
 					{$currentTheme.bgCard} 0%,
-					{$currentTheme.bgSurface} 50%,
-					{$currentTheme.bgElevated} 100%
+					{$currentTheme.bgSecondary} 100%
 				);
 				border: 2px solid {$currentTheme.primary}60;
 				box-shadow:
 					0 0 40px {$currentTheme.glow},
-					0 25px 50px -12px rgba(0, 0, 0, 0.5),
+					0 25px 50px -12px rgba(0, 0, 0, 0.15),
 					inset 0 1px 0 {$currentTheme.primaryLight}30;
 			"
 		>
@@ -171,7 +170,7 @@
 					<span
 						class="text-lg font-medium px-3 py-1 rounded-full"
 						style="
-							background: {$currentTheme.bgDeep};
+							background: {$currentTheme.bgSecondary};
 							color: {$currentTheme.textMuted};
 						"
 					>
@@ -219,7 +218,7 @@
 			<!-- Progress bar -->
 			<div
 				class="h-1 rounded-full overflow-hidden mb-2"
-				style="background: {$currentTheme.bgDeep};"
+				style="background: {$currentTheme.bgSecondary};"
 			>
 				<div
 					class="h-full rounded-full transition-all duration-100"

@@ -68,8 +68,8 @@
 
 <div class="min-h-screen pb-24 relative overflow-hidden">
 	<div class="fixed inset-0 overflow-hidden pointer-events-none">
-		<div class="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl animate-float-drift" style="background: {$currentTheme.primary}15;"></div>
-		<div class="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl animate-float-drift" style="background: {$currentTheme.secondary}10; animation-delay: -4s;"></div>
+		<div class="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl animate-float-drift" style="background: {$currentTheme.primary}10;"></div>
+		<div class="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl animate-float-drift" style="background: {$currentTheme.secondary}08; animation-delay: -4s;"></div>
 	</div>
 
 	<header class="relative px-6 pt-8 pb-6 z-10">
@@ -114,7 +114,7 @@
 						<div class="w-12 h-12 rounded-full border flex items-center justify-center" style="background: {$currentTheme.bgSurface}; border-color: {$currentTheme.primary}10;">
 							{@html getAvatarSvg(leaderboard[1].avatar, 'md')}
 						</div>
-						<div class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center" style="background: {$currentTheme.bgDeep}; border: 1px solid {$currentTheme.textMuted}20;">
+						<div class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center" style="background: {$currentTheme.bgSecondary}; border: 1px solid {$currentTheme.textMuted}20;">
 							<span class="text-[10px]" style="color: {$currentTheme.textMuted};">2</span>
 						</div>
 					</div>
@@ -151,7 +151,7 @@
 						<div class="w-12 h-12 rounded-full border flex items-center justify-center" style="background: {$currentTheme.bgSurface}; border-color: {$currentTheme.textMuted}10;">
 							{@html getAvatarSvg(leaderboard[2].avatar, 'md')}
 						</div>
-						<div class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center" style="background: {$currentTheme.bgDeep}; border: 1px solid {$currentTheme.textMuted}20;">
+						<div class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center" style="background: {$currentTheme.bgSecondary}; border: 1px solid {$currentTheme.textMuted}20;">
 							<span class="text-[10px]" style="color: {$currentTheme.accent};">3</span>
 						</div>
 					</div>
@@ -175,7 +175,7 @@
 			<div class="divide-y" style="border-color: {$currentTheme.primary}05;">
 				{#each leaderboard.slice(3) as user, index}
 				<div class="flex items-center px-5 py-3.5 transition-colors duration-200" style="background: {currentUser?.id === user.id ? $currentTheme.primary + '08' : 'transparent'};" onmouseenter={(e) => e.currentTarget.style.background = `${$currentTheme.primary}05`} onmouseleave={(e) => e.currentTarget.style.background = currentUser?.id === user.id ? `${$currentTheme.primary}08` : 'transparent'}>
-					<div class="w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0" style="background: {$currentTheme.bgDeep}; border: 1px solid {$currentTheme.textMuted}10;">
+					<div class="w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0" style="background: {$currentTheme.bgSecondary}; border: 1px solid {$currentTheme.textMuted}10;">
 						<span class="text-[11px]" style="color: {$currentTheme.textMuted}; opacity: 0.5;">{user.rank}</span>
 					</div>
 					<div class="w-8 h-8 rounded-full border flex items-center justify-center mr-3 flex-shrink-0" style="background: {$currentTheme.bgSurface}; border-color: {$currentTheme.textMuted}05;">
